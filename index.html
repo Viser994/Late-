@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brampton Smart Transit & Traffic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" onclick="showSection('home')">
+        <span class="logo-icon">🚌</span>
+        <span class="logo-text">Brampton<strong>Transit</strong></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#" class="nav-link active" data-section="home">Home</a></li>
+        <li><a href="#" class="nav-link" data-section="traffic">Live Traffic</a></li>
+        <li><a href="#" class="nav-link" data-section="transit">Transit Info</a></li>
+        <li><a href="#" class="nav-link" data-section="planner">Plan Route</a></li>
+        <li><a href="#" class="nav-link" data-section="feedback">Community</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="btn btn-outline" id="loginBtn" onclick="openModal('loginModal')">Sign In</button>
+        <button class="btn btn-primary" id="signupBtn" onclick="openModal('signupModal')">Get Started</button>
+        <div class="user-menu hidden" id="userMenu">
+          <div class="user-avatar" id="userAvatar">J</div>
+          <span class="user-name" id="userName">Jane</span>
+          <button class="btn btn-sm" onclick="logout()">Sign Out</button>
+        </div>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO / HOME SECTION ===== -->
+  <section id="section-home" class="section active">
+    <div class="hero">
+      <div class="hero-bg">
+        <div class="hero-grid"></div>
+        <div class="hero-dots"></div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-badge">🏙️ Brampton, Ontario</div>
+        <h1 class="hero-title">
+          Smart Transit &<br/><span class="gradient-text">Traffic Intelligence</span>
+        </h1>
+        <p class="hero-subtitle">
+          Navigate Brampton faster with real-time traffic updates, live transit tracking,
+          and AI-powered commute planning — all in one place.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="openModal('signupModal')">Start Your Free Account</button>
+          <button class="btn btn-ghost btn-lg" onclick="showSection('traffic')">Explore Live Map →</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-value">42,000+</span>
+            <span class="stat-label">Daily Commuters</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value">18 min</span>
+            <span class="stat-label">Avg. Time Saved</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value">98.2%</span>
+            <span class="stat-label">Uptime</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="city-map-mockup" id="cityMap"></div>
+      </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="container section-block">
+      <div class="section-header">
+        <h2>Everything You Need to Commute Smarter</h2>
+        <p>Powered by real-time city data and smart algorithms designed for Brampton.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card" onclick="showSection('traffic')">
+          <div class="feature-icon red">🚦</div>
+          <h3>Live Traffic Updates</h3>
+          <p>Real-time congestion alerts, incident reports, and alternate route suggestions to keep you moving.</p>
+          <span class="feature-link">View Traffic Map →</span>
+        </div>
+        <div class="feature-card" onclick="showSection('traffic')">
+          <div class="feature-icon green">🟢</div>
+          <h3>Smart Light Sync</h3>
+          <p>Dynamic traffic light coordination reduces stop times and improves flow on major corridors.</p>
+          <span class="feature-link">See How It Works →</span>
+        </div>
+        <div class="feature-card" onclick="showSection('transit')">
+          <div class="feature-icon blue">🚌</div>
+          <h3>Real-Time Transit</h3>
+          <p>Track Brampton Transit buses live, with exact arrival times and crowding indicators.</p>
+          <span class="feature-link">Track Buses →</span>
+        </div>
+        <div class="feature-card" onclick="showSection('planner')">
+          <div class="feature-icon purple">🗺️</div>
+          <h3>Commute Planner</h3>
+          <p>Personalized multi-modal routes combining transit, driving, walking, and cycling options.</p>
+          <span class="feature-link">Plan Your Route →</span>
+        </div>
+        <div class="feature-card" onclick="showSection('feedback')">
+          <div class="feature-icon orange">📣</div>
+          <h3>Community Reports</h3>
+          <p>Report delays, hazards, or issues. Crowdsourced data improves the system for everyone.</p>
+          <span class="feature-link">Report an Issue →</span>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon teal">🔔</div>
+          <h3>Smart Alerts</h3>
+          <p>Personalized notifications for your commute — get warned before disruptions affect your journey.</p>
+          <span class="feature-link">Enable Alerts →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Download / CTA -->
+    <div class="cta-banner">
+      <div class="container cta-inner">
+        <div class="cta-text">
+          <h2>Ready to Transform Your Commute?</h2>
+          <p>Join thousands of Brampton residents already saving time every day.</p>
+        </div>
+        <div class="cta-actions">
+          <button class="btn btn-primary btn-lg" onclick="openModal('signupModal')">Create Free Account</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LIVE TRAFFIC SECTION ===== -->
+  <section id="section-traffic" class="section">
+    <div class="container section-top">
+      <div class="section-header left">
+        <h2>🚦 Live Traffic &amp; Smart Light Sync</h2>
+        <p>Real-time congestion data across Brampton's major corridors.</p>
+      </div>
+      <div class="traffic-controls">
+        <button class="filter-btn active" data-filter="all">All Events</button>
+        <button class="filter-btn" data-filter="incident">Incidents</button>
+        <button class="filter-btn" data-filter="construction">Construction</button>
+        <button class="filter-btn" data-filter="congestion">Congestion</button>
+      </div>
+    </div>
+
+    <div class="container traffic-layout">
+      <!-- Map Canvas -->
+      <div class="map-container">
+        <div class="map-canvas" id="trafficMap">
+          <div class="map-label">Brampton Road Network</div>
+          <svg class="map-svg" viewBox="0 0 700 500" id="mapSVG"></svg>
+          <div class="map-legend">
+            <span class="legend-dot green"></span> Clear
+            <span class="legend-dot yellow"></span> Slow
+            <span class="legend-dot red"></span> Congested
+          </div>
+        </div>
+        <!-- Traffic Light Sync Panel -->
+        <div class="light-sync-panel">
+          <h4>🟢 Smart Light Sync — Queen St. Corridor</h4>
+          <div class="light-row" id="lightSyncRow"></div>
+          <p class="sync-note">Lights are dynamically coordinated to minimize stops.</p>
+        </div>
+      </div>
+
+      <!-- Alerts Sidebar -->
+      <div class="alerts-sidebar">
+        <div class="alerts-header">
+          <h3>Active Alerts</h3>
+          <span class="live-badge">● LIVE</span>
+        </div>
+        <div class="alerts-list" id="alertsList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRANSIT INFO SECTION ===== -->
+  <section id="section-transit" class="section">
+    <div class="container section-top">
+      <div class="section-header left">
+        <h2>🚌 Real-Time Transit Info</h2>
+        <p>Live bus tracking, arrival times, and occupancy levels across Brampton Transit routes.</p>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="routeSearch" placeholder="Search route or stop (e.g., Route 1, Bramalea GO)" oninput="filterRoutes()" />
+        <button class="btn btn-primary" onclick="filterRoutes()">Search</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="transit-tabs">
+        <button class="tab-btn active" onclick="switchTransitTab('buses')">🚌 Buses</button>
+        <button class="tab-btn" onclick="switchTransitTab('go')">🚆 GO Transit</button>
+        <button class="tab-btn" onclick="switchTransitTab('stops')">📍 Nearby Stops</button>
+      </div>
+
+      <div class="transit-panel" id="transit-buses">
+        <div class="routes-grid" id="routesGrid"></div>
+      </div>
+
+      <div class="transit-panel hidden" id="transit-go">
+        <div class="go-trains" id="goTrains"></div>
+      </div>
+
+      <div class="transit-panel hidden" id="transit-stops">
+        <div class="stops-list" id="stopsList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMMUTE PLANNER SECTION ===== -->
+  <section id="section-planner" class="section">
+    <div class="container section-top">
+      <div class="section-header left">
+        <h2>🗺️ Personalized Commute Planner</h2>
+        <p>Get optimized multi-modal routes tailored to your schedule and preferences.</p>
+      </div>
+    </div>
+    <div class="container planner-layout">
+      <div class="planner-form-card">
+        <h3>Plan Your Journey</h3>
+        <div class="form-group">
+          <label>From</label>
+          <div class="input-with-icon">
+            <span class="input-icon">📍</span>
+            <input type="text" id="fromLocation" placeholder="Enter start location or use saved home" />
+          </div>
+          <button class="use-saved-btn" onclick="useSavedLocation('from')">Use Home</button>
+        </div>
+        <div class="form-group">
+          <label>To</label>
+          <div class="input-with-icon">
+            <span class="input-icon">🎯</span>
+            <input type="text" id="toLocation" placeholder="Enter destination or use saved work" />
+          </div>
+          <button class="use-saved-btn" onclick="useSavedLocation('to')">Use Work</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Depart At</label>
+            <input type="time" id="departTime" value="08:30" />
+          </div>
+          <div class="form-group half">
+            <label>Date</label>
+            <input type="date" id="departDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Preferred Mode</label>
+          <div class="mode-selector" id="modeSelector">
+            <button class="mode-btn active" data-mode="transit">🚌 Transit</button>
+            <button class="mode-btn" data-mode="drive">🚗 Drive</button>
+            <button class="mode-btn" data-mode="bike">🚴 Bike</button>
+            <button class="mode-btn" data-mode="walk">🚶 Walk</button>
+            <button class="mode-btn" data-mode="mixed">🔀 Mixed</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="planRoute()">Find Best Routes</button>
+      </div>
+
+      <div class="planner-results" id="plannerResults">
+        <div class="results-placeholder">
+          <div class="placeholder-icon">🗺️</div>
+          <p>Enter your start and destination to see personalized route options.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMMUNITY FEEDBACK SECTION ===== -->
+  <section id="section-feedback" class="section">
+    <div class="container section-top">
+      <div class="section-header left">
+        <h2>📣 Community Reports</h2>
+        <p>Help improve Brampton's transit by reporting issues and sharing updates.</p>
+      </div>
+    </div>
+    <div class="container feedback-layout">
+      <div class="report-form-card">
+        <h3>Submit a Report</h3>
+        <div class="form-group">
+          <label>Issue Type</label>
+          <div class="report-type-grid" id="reportTypeGrid">
+            <button class="report-type-btn active" data-type="traffic">🚦 Traffic Jam</button>
+            <button class="report-type-btn" data-type="accident">⚠️ Accident</button>
+            <button class="report-type-btn" data-type="construction">🚧 Construction</button>
+            <button class="report-type-btn" data-type="bus-delay">🚌 Bus Delay</button>
+            <button class="report-type-btn" data-type="road-closure">🚫 Road Closure</button>
+            <button class="report-type-btn" data-type="hazard">🌊 Road Hazard</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <div class="input-with-icon">
+            <span class="input-icon">📍</span>
+            <input type="text" id="reportLocation" placeholder="Street name, intersection, or landmark" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="reportDescription" rows="4" placeholder="Describe the issue (optional but helpful)..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Severity</label>
+          <div class="severity-slider-wrap">
+            <input type="range" id="severitySlider" min="1" max="3" value="2" oninput="updateSeverity(this.value)" />
+            <div class="severity-labels">
+              <span>Minor</span><span>Moderate</span><span>Severe</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="submitReport()">Submit Report</button>
+      </div>
+
+      <div class="community-feed">
+        <div class="feed-header">
+          <h3>Recent Community Reports</h3>
+          <span class="live-badge">● LIVE</span>
+        </div>
+        <div class="feed-list" id="feedList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SIGN IN MODAL ===== -->
+  <div class="modal-overlay" id="loginModal" onclick="closeModalOutside(event, 'loginModal')">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+      <div class="modal-logo">🚌</div>
+      <h2>Welcome Back</h2>
+      <p class="modal-subtitle">Sign in to your Brampton Smart Transit account</p>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+        <div class="form-row-space">
+          <label class="checkbox-label"><input type="checkbox" /> Remember me</label>
+          <a href="#" class="text-link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+      </form>
+      <div class="modal-divider"><span>or continue with</span></div>
+      <div class="social-btns">
+        <button class="btn btn-social google" onclick="socialLogin('Google')">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+          Google
+        </button>
+        <button class="btn btn-social facebook" onclick="socialLogin('Facebook')">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#1877F2" d="M18 9a9 9 0 1 0-10.41 8.89V11.5H5.31V9h2.28V7.13c0-2.26 1.34-3.5 3.4-3.5.98 0 2 .17 2 .17v2.21h-1.12c-1.1 0-1.44.68-1.44 1.38V9h2.45l-.39 2.5h-2.06v6.39A9 9 0 0 0 18 9z"/></svg>
+          Facebook
+        </button>
+      </div>
+      <p class="modal-footer-text">Don't have an account? <a href="#" class="text-link" onclick="switchModal('loginModal','signupModal')">Sign up free</a></p>
+    </div>
+  </div>
+
+  <!-- ===== SIGN UP MODAL ===== -->
+  <div class="modal-overlay" id="signupModal" onclick="closeModalOutside(event, 'signupModal')">
+    <div class="modal modal-wide">
+      <button class="modal-close" onclick="closeModal('signupModal')">✕</button>
+      <div class="modal-logo">🚌</div>
+      <h2>Create Your Account</h2>
+      <p class="modal-subtitle">Free to join — start commuting smarter today</p>
+      <form onsubmit="handleSignup(event)">
+        <div class="form-row">
+          <div class="form-group half">
+            <label>First Name</label>
+            <input type="text" id="signupFirst" placeholder="Jane" required />
+          </div>
+          <div class="form-group half">
+            <label>Last Name</label>
+            <input type="text" id="signupLast" placeholder="Doe" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Minimum 8 characters" required minlength="8" />
+        </div>
+        <div class="form-group">
+          <label>Home Address <span class="optional">(optional — for personalized routes)</span></label>
+          <input type="text" id="signupHome" placeholder="e.g., 100 Queen St W, Brampton" />
+        </div>
+        <div class="form-group">
+          <label>Work Address <span class="optional">(optional)</span></label>
+          <input type="text" id="signupWork" placeholder="e.g., Bramalea City Centre" />
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label large">
+            <input type="checkbox" id="signupNotifications" checked />
+            Enable live commute alerts &amp; notifications
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label large">
+            <input type="checkbox" id="signupPrivacy" required />
+            I agree to the <a href="#" class="text-link">Privacy Policy</a> and <a href="#" class="text-link">Terms of Service</a>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+      </form>
+      <div class="modal-divider"><span>or sign up with</span></div>
+      <div class="social-btns">
+        <button class="btn btn-social google" onclick="socialLogin('Google')">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+          Google
+        </button>
+        <button class="btn btn-social facebook" onclick="socialLogin('Facebook')">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#1877F2" d="M18 9a9 9 0 1 0-10.41 8.89V11.5H5.31V9h2.28V7.13c0-2.26 1.34-3.5 3.4-3.5.98 0 2 .17 2 .17v2.21h-1.12c-1.1 0-1.44.68-1.44 1.38V9h2.45l-.39 2.5h-2.06v6.39A9 9 0 0 0 18 9z"/></svg>
+          Facebook
+        </button>
+      </div>
+      <p class="modal-footer-text">Already have an account? <a href="#" class="text-link" onclick="switchModal('signupModal','loginModal')">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
