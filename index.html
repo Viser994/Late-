@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Brampton Smart Transit & Traffic — real-time traffic, transit tracking, smart light sync and commute planning for Brampton." />
+  <meta name="theme-color" content="#0b7a3b" />
+  <title>Brampton Smart Transit &amp; Traffic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>" />
+</head>
+<body>
+  <!-- ============ AUTH SCREEN ============ -->
+  <section id="auth" class="auth" aria-label="Sign in">
+    <div class="auth__card">
+      <div class="brand brand--lg">
+        <span class="brand__mark" aria-hidden="true">🚦</span>
+        <div>
+          <h1 class="brand__title">Brampton Smart Transit</h1>
+          <p class="brand__tag">Faster. Greener. Easier.</p>
+        </div>
+      </div>
+
+      <div class="auth__tabs" role="tablist">
+        <button class="auth__tab is-active" data-authtab="signin" role="tab">Sign In</button>
+        <button class="auth__tab" data-authtab="signup" role="tab">Create Account</button>
+      </div>
+
+      <!-- Sign in -->
+      <form id="form-signin" class="auth__form" autocomplete="on">
+        <label>Email
+          <input type="email" name="email" placeholder="you@example.com" required />
+        </label>
+        <label>Password
+          <input type="password" name="password" placeholder="••••••••" required minlength="6" />
+        </label>
+        <button type="submit" class="btn btn--primary btn--block">Sign In</button>
+        <p class="auth__hint" id="signin-hint" role="alert"></p>
+        <div class="auth__divider"><span>or continue with</span></div>
+        <div class="auth__social">
+          <button type="button" class="btn btn--ghost" data-social="Google">Google</button>
+          <button type="button" class="btn btn--ghost" data-social="Facebook">Facebook</button>
+          <button type="button" class="btn btn--ghost" data-social="Apple">Apple</button>
+        </div>
+      </form>
+
+      <!-- Sign up -->
+      <form id="form-signup" class="auth__form is-hidden" autocomplete="on">
+        <label>Full name
+          <input type="text" name="name" placeholder="Jordan Singh" required />
+        </label>
+        <label>Email
+          <input type="email" name="email" placeholder="you@example.com" required />
+        </label>
+        <label>Password
+          <input type="password" name="password" placeholder="At least 6 characters" required minlength="6" />
+        </label>
+        <div class="auth__row">
+          <label>Home location
+            <input type="text" name="home" placeholder="e.g. Mount Pleasant" />
+          </label>
+          <label>Work location
+            <input type="text" name="work" placeholder="e.g. Downtown Brampton" />
+          </label>
+        </div>
+        <label class="auth__check">
+          <input type="checkbox" name="notify" checked />
+          Enable notifications for live alerts during my daily travels
+        </label>
+        <button type="submit" class="btn btn--primary btn--block">Create free account</button>
+        <p class="auth__hint" id="signup-hint" role="alert"></p>
+        <p class="auth__fine">Your data helps us provide better routing and traffic insights — privacy is protected according to local standards.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ APP SHELL ============ -->
+  <div id="app" class="app is-hidden">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">🚦</span>
+        <strong class="brand__title">Brampton Smart Transit</strong>
+      </div>
+      <div class="topbar__right">
+        <span id="clock" class="topbar__clock" aria-live="off"></span>
+        <button id="notif-btn" class="iconbtn" title="Notifications" aria-label="Notifications">
+          🔔<span id="notif-count" class="badge is-hidden">0</span>
+        </button>
+        <div class="usermenu">
+          <button id="user-btn" class="iconbtn" aria-label="Account"><span id="user-initials">U</span></button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Dashboard -->
+      <section class="view is-active" data-view="dashboard">
+        <div class="hero">
+          <h2 id="greeting">Good day</h2>
+          <p id="greeting-sub" class="muted">Here is your Brampton commute snapshot.</p>
+        </div>
+        <div class="cards" id="dash-stats"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head"><h3>Your saved commute</h3></div>
+            <div id="dash-commute" class="commute-summary"></div>
+            <button class="btn btn--primary" data-goto="planner">Plan a trip</button>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h3>Live alerts</h3></div>
+            <ul id="dash-alerts" class="alertlist"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Traffic -->
+      <section class="view" data-view="traffic">
+        <div class="view__head">
+          <h2>Live Traffic Updates</h2>
+          <p class="muted">Real-time congestion across Brampton corridors with suggested alternates.</p>
+        </div>
+        <div class="cards" id="traffic-stats"></div>
+        <div class="panel">
+          <div class="panel__head">
+            <h3>Corridor status</h3>
+            <span class="live"><span class="live__dot"></span>Live</span>
+          </div>
+          <div id="traffic-list" class="roadlist"></div>
+        </div>
+      </section>
+
+      <!-- Smart Lights -->
+      <section class="view" data-view="lights">
+        <div class="view__head">
+          <h2>Smart Traffic Lights Sync</h2>
+          <p class="muted">Signals adapt dynamically to traffic flow to reduce stop times along key corridors.</p>
+        </div>
+        <div class="cards" id="lights-stats"></div>
+        <div class="panel">
+          <div class="panel__head">
+            <h3>Intersection signals</h3>
+            <span class="live"><span class="live__dot"></span>Synced</span>
+          </div>
+          <div id="lights-grid" class="lights-grid"></div>
+        </div>
+      </section>
+
+      <!-- Transit -->
+      <section class="view" data-view="transit">
+        <div class="view__head">
+          <h2>Real-Time Transit Info</h2>
+          <p class="muted">Track buses &amp; trains live, with arrival times and crowding before you board.</p>
+        </div>
+        <div class="searchbar">
+          <input id="transit-search" type="search" placeholder="Search route or stop (e.g. 501, Bramalea)" />
+        </div>
+        <div id="transit-list" class="transitlist"></div>
+      </section>
+
+      <!-- Planner -->
+      <section class="view" data-view="planner">
+        <div class="view__head">
+          <h2>Personalized Commute Planning</h2>
+          <p class="muted">Optimized routes combining driving, walking, biking and transit.</p>
+        </div>
+        <div class="panel">
+          <form id="planner-form" class="planner-form">
+            <label>From<input type="text" name="from" placeholder="Start location" required /></label>
+            <label>To<input type="text" name="to" placeholder="Destination" required /></label>
+            <label>Priority
+              <select name="priority">
+                <option value="fastest">Fastest</option>
+                <option value="greenest">Greenest</option>
+                <option value="cheapest">Cheapest</option>
+              </select>
+            </label>
+            <button type="submit" class="btn btn--primary">Find routes</button>
+          </form>
+        </div>
+        <div id="planner-results" class="routes"></div>
+      </section>
+
+      <!-- Community -->
+      <section class="view" data-view="community">
+        <div class="view__head">
+          <h2>Community Feedback</h2>
+          <p class="muted">Report traffic issues or delays to help improve the system for everyone.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head"><h3>Report an issue</h3></div>
+            <form id="report-form" class="report-form">
+              <label>Type
+                <select name="type">
+                  <option>Congestion</option>
+                  <option>Collision</option>
+                  <option>Road closure</option>
+                  <option>Transit delay</option>
+                  <option>Signal outage</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>Location<input type="text" name="location" placeholder="e.g. Queen St & Main St" required /></label>
+              <label>Details<textarea name="details" rows="3" placeholder="Describe what you're seeing"></textarea></label>
+              <button type="submit" class="btn btn--primary">Submit report</button>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h3>Recent community reports</h3></div>
+            <ul id="reports-list" class="reports"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Account -->
+      <section class="view" data-view="account">
+        <div class="view__head"><h2>Account</h2></div>
+        <div class="panel">
+          <form id="account-form" class="account-form">
+            <label>Full name<input type="text" name="name" /></label>
+            <label>Email<input type="email" name="email" readonly /></label>
+            <div class="auth__row">
+              <label>Home location<input type="text" name="home" /></label>
+              <label>Work location<input type="text" name="work" /></label>
+            </div>
+            <label class="auth__check"><input type="checkbox" name="notify" /> Notifications enabled</label>
+            <div class="account-form__actions">
+              <button type="submit" class="btn btn--primary">Save changes</button>
+              <button type="button" id="logout-btn" class="btn btn--ghost">Sign out</button>
+            </div>
+            <p id="account-hint" class="auth__hint" role="alert"></p>
+          </form>
+        </div>
+        <p class="muted small">Support: <a href="mailto:support@bramptonsmarttransit.ca">support@bramptonsmarttransit.ca</a> · This app is developed and hosted locally for Brampton.</p>
+      </section>
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="nav" aria-label="Primary">
+      <button class="nav__item is-active" data-nav="dashboard"><span>🏠</span>Home</button>
+      <button class="nav__item" data-nav="traffic"><span>🚗</span>Traffic</button>
+      <button class="nav__item" data-nav="lights"><span>🚦</span>Lights</button>
+      <button class="nav__item" data-nav="transit"><span>🚌</span>Transit</button>
+      <button class="nav__item" data-nav="planner"><span>🧭</span>Plan</button>
+      <button class="nav__item" data-nav="community"><span>📣</span>Community</button>
+    </nav>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
