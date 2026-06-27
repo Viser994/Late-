@@ -2,10 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=./">
-    <title>Redirecting to Brampton Smart Transit &amp; Traffic</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Late Arrival Tracker</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #66bb6a, #388e3c); /* Shades of green */
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 400px;
+            margin: auto;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .school-logo {
+            max-width: 100px;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="time"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border: none;
+            background-color: #388e3c;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2c6d2d;
+        }
+        .quote {
+            font-style: italic;
+            margin-top: 20px;
+        }
+        .date {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <p><a href="./">Continue to Brampton Smart Transit &amp; Traffic</a>.</p>
+
+    <div class="container">
+        <!-- Brisadale Public School Logo -->
+        <img src="brisadale_logo.png" alt="Brisadale Public School Logo" class="school-logo"> <!-- Replace with your logo's path -->
+        
+        <h1>Late Arrival Tracker</h1>
+
+        <!-- Display the current date -->
+        <div class="date" id="currentDate"></div>
+
+        <!-- Form to capture user data -->
+        <form action="https://formspree.io/f/xrbeayag" method="POST">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="time" name="arrival_time" required>
+            <textarea name="comments" rows="4" placeholder="Any comments?" required></textarea>
+            <button type="submit">Submit Your Name</button>
+        </form>
+
+        <div class="quote">
+            <p>"The early bird catches the worm, but the late bird still has time to learn!"</p>
+        </div>
+    </div>
+
+    <script>
+        // Set the current date in the format: Day, Month Date, Year (e.g., "Tuesday, February 13, 2025")
+        const currentDateElement = document.getElementById('currentDate');
+        const today = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateElement.textContent = today.toLocaleDateString('en-US', options);
+    </script>
+
 </body>
 </html>
