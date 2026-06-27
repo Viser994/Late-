@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brampton Smart Transit &amp; Traffic</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #09203f 0%, #1f8f5f 100%);
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 48px;
+        }
+
+        .hero {
+            background-color: rgba(0, 0, 0, 0.45);
+            border-radius: 20px;
+            padding: 42px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 6vw, 4.4rem);
+            line-height: 1.1;
+            margin: 0 0 18px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 42px 0 18px;
+            text-align: center;
+        }
+
+        h3 {
+            color: #c8f7dc;
+            margin-top: 0;
+        }
+
+        p {
+            margin: 0 0 16px;
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            max-width: 760px;
+            margin: 0 auto 28px;
+        }
+
+        .cta {
+            display: inline-block;
+            background-color: #f9c846;
+            border-radius: 999px;
+            color: #09203f;
+            font-weight: bold;
+            padding: 13px 26px;
+            text-decoration: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .card,
+        .signup,
+        .support {
+            background-color: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(8px);
+        }
+
+        .card p,
+        .support p,
+        .signup p {
+            color: #eef8f1;
+        }
+
+        .signup {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        form {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        label {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .checkbox-row {
+            align-items: center;
+            display: flex;
+            gap: 10px;
+            text-align: left;
+        }
+
+        button {
+            background-color: #f9c846;
+            border: none;
+            border-radius: 999px;
+            color: #09203f;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: bold;
+            padding: 13px 26px;
+        }
+
+        button:hover {
+            background-color: #ffd96d;
+        }
+
+        .support {
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .hero {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="hero">
+            <h1>Brampton Smart Transit &amp; Traffic</h1>
+            <p class="tagline">
+                Your all-in-one app for faster, greener, and easier travel around Brampton.
+                Use real-time traffic and transit insights to avoid delays, catch your ride on
+                time, and choose smarter routes every day.
+            </p>
+            <a class="cta" href="#signup">Create Your Free Account</a>
+        </section>
+
+        <section aria-labelledby="features-heading">
+            <h2 id="features-heading">Key Features</h2>
+            <div class="grid">
+                <article class="card">
+                    <h3>Live Traffic Updates</h3>
+                    <p>Get real-time alerts about congestion, road disruptions, and alternative routes that help you save time.</p>
+                </article>
+                <article class="card">
+                    <h3>Smart Traffic Lights Sync</h3>
+                    <p>Experience smoother journeys as traffic lights adjust dynamically to reduce unnecessary stop times.</p>
+                </article>
+                <article class="card">
+                    <h3>Real-Time Transit Info</h3>
+                    <p>Track buses and trains live, view accurate arrival times, and check crowding before you board.</p>
+                </article>
+                <article class="card">
+                    <h3>Personalized Commute Planning</h3>
+                    <p>Receive optimized routes that combine driving, walking, biking, and public transit options.</p>
+                </article>
+                <article class="card">
+                    <h3>Community Feedback</h3>
+                    <p>Report traffic issues, delays, and local concerns so the system can improve for everyone.</p>
+                </article>
+                <article class="card">
+                    <h3>Privacy Protected</h3>
+                    <p>Your data helps improve routing and traffic insights while staying protected according to local standards.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="signup" id="signup" aria-labelledby="signup-heading">
+            <h2 id="signup-heading">Sign In and Get Started</h2>
+            <p>
+                Create your free Brampton Smart Transit account, set your home and work
+                locations, and enable notifications for live alerts during your daily travels.
+            </p>
+            <form action="#" method="POST">
+                <div>
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                </div>
+                <div>
+                    <label for="home">Home location</label>
+                    <input type="text" id="home" name="home" placeholder="Enter your home area or address" required>
+                </div>
+                <div>
+                    <label for="work">Work or school location</label>
+                    <input type="text" id="work" name="work" placeholder="Enter your destination" required>
+                </div>
+                <div>
+                    <label for="signin-method">Preferred sign-in method</label>
+                    <select id="signin-method" name="signin_method">
+                        <option>Email account</option>
+                        <option>Google</option>
+                        <option>Apple</option>
+                        <option>Facebook</option>
+                    </select>
+                </div>
+                <label class="checkbox-row">
+                    <input type="checkbox" name="notifications" checked>
+                    Enable notifications for traffic and transit alerts
+                </label>
+                <button type="submit">Sign Up</button>
+            </form>
+        </section>
+
+        <section class="support" aria-labelledby="support-heading">
+            <h2 id="support-heading">Hosting and Support</h2>
+            <p>
+                Developed and hosted locally for Brampton's transportation needs, this app
+                is regularly updated using community feedback and city transportation data.
+            </p>
+            <p>For questions or technical support, contact support@bramptonsmarttransit.ca.</p>
+        </section>
+    </div>
+</body>
+</html>
