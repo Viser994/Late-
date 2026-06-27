@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Brampton Smart Transit & Traffic — real-time traffic, transit tracking, and smart commute planning for Brampton.">
+  <title>Brampton Smart Transit & Traffic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo" data-nav="home">
+        <span class="logo-icon" aria-hidden="true">🚌</span>
+        <span class="logo-text">Brampton Smart Transit</span>
+      </a>
+      <nav class="nav" id="mainNav">
+        <button class="nav-link active" data-nav="home">Home</button>
+        <button class="nav-link" data-nav="traffic">Traffic</button>
+        <button class="nav-link" data-nav="transit">Transit</button>
+        <button class="nav-link" data-nav="commute">Commute</button>
+        <button class="nav-link" data-nav="feedback">Feedback</button>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="signInBtn">Sign In</button>
+        <button class="btn btn-primary" id="signUpBtn">Sign Up</button>
+        <button class="user-menu-btn hidden" id="userMenuBtn" aria-label="User menu">
+          <span class="user-avatar" id="userAvatar">U</span>
+        </button>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Home Section -->
+    <section id="home" class="section active">
+      <div class="hero">
+        <div class="hero-content">
+          <span class="hero-badge">Serving Brampton, Ontario</span>
+          <h1>Travel Brampton <span class="highlight">Smarter</span></h1>
+          <p class="hero-subtitle">Real-time traffic alerts, live transit tracking, and personalized commute planning — all in one app designed for Brampton's growing community.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg" data-nav="commute">Plan My Commute</button>
+            <button class="btn btn-outline btn-lg" data-nav="transit">Track Transit</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-value" id="statRoutes">24</span>
+            <span class="stat-label">Active Routes</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statAlerts">7</span>
+            <span class="stat-label">Live Alerts</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statOnTime">94%</span>
+            <span class="stat-label">On-Time Rate</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <article class="feature-card" data-nav="traffic">
+          <div class="feature-icon">🚦</div>
+          <h3>Live Traffic Updates</h3>
+          <p>Real-time congestion alerts and alternative routes to save time on Brampton roads.</p>
+        </article>
+        <article class="feature-card" data-nav="traffic">
+          <div class="feature-icon">💡</div>
+          <h3>Smart Traffic Lights</h3>
+          <p>Traffic signals adjust dynamically to reduce stop times and keep you moving.</p>
+        </article>
+        <article class="feature-card" data-nav="transit">
+          <div class="feature-icon">🚍</div>
+          <h3>Real-Time Transit</h3>
+          <p>Track buses and trains live with exact arrival times and crowd levels.</p>
+        </article>
+        <article class="feature-card" data-nav="commute">
+          <div class="feature-icon">🗺️</div>
+          <h3>Commute Planning</h3>
+          <p>Optimized routes combining driving, walking, biking, or transit options.</p>
+        </article>
+        <article class="feature-card" data-nav="feedback">
+          <div class="feature-icon">💬</div>
+          <h3>Community Feedback</h3>
+          <p>Report traffic issues and delays to help improve the system for everyone.</p>
+        </article>
+        <article class="feature-card" id="notificationsFeature">
+          <div class="feature-icon">🔔</div>
+          <h3>Live Alerts</h3>
+          <p>Enable notifications for personalized alerts during your daily travels.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Traffic Section -->
+    <section id="traffic" class="section">
+      <div class="section-header">
+        <h2>Live Traffic & Smart Signals</h2>
+        <p>Updated every 30 seconds from Brampton traffic sensors</p>
+        <span class="live-indicator"><span class="pulse"></span> Live</span>
+      </div>
+
+      <div class="traffic-overview">
+        <div class="traffic-status-card status-good">
+          <span class="status-label">City Average</span>
+          <span class="status-value" id="cityTrafficStatus">Moderate</span>
+        </div>
+        <div class="traffic-status-card">
+          <span class="status-label">Active Incidents</span>
+          <span class="status-value" id="incidentCount">3</span>
+        </div>
+        <div class="traffic-status-card">
+          <span class="status-label">Signals Optimized</span>
+          <span class="status-value" id="signalsOptimized">18</span>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel">
+          <h3>Traffic Alerts</h3>
+          <div id="trafficAlerts" class="alert-list"></div>
+        </div>
+        <div class="panel">
+          <h3>Smart Signal Sync</h3>
+          <div id="signalSync" class="signal-list"></div>
+        </div>
+      </div>
+
+      <div class="panel map-panel">
+        <h3>Road Conditions Map</h3>
+        <div class="road-map" id="roadMap">
+          <div class="map-legend">
+            <span><i class="legend-dot good"></i> Clear</span>
+            <span><i class="legend-dot moderate"></i> Moderate</span>
+            <span><i class="legend-dot heavy"></i> Heavy</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transit Section -->
+    <section id="transit" class="section">
+      <div class="section-header">
+        <h2>Real-Time Transit</h2>
+        <p>Track Brampton Transit and GO trains live</p>
+        <span class="live-indicator"><span class="pulse"></span> Live</span>
+      </div>
+
+      <div class="transit-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="bus">Buses</button>
+        <button class="filter-btn" data-filter="train">GO Trains</button>
+        <button class="filter-btn" data-filter="favorites">Favorites</button>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="transitSearch" placeholder="Search routes, stops, or destinations..." aria-label="Search transit">
+      </div>
+
+      <div id="transitList" class="transit-list"></div>
+    </section>
+
+    <!-- Commute Section -->
+    <section id="commute" class="section">
+      <div class="section-header">
+        <h2>Personalized Commute Planning</h2>
+        <p>Find the fastest, greenest route for your journey</p>
+      </div>
+
+      <div class="commute-planner">
+        <div class="planner-form panel">
+          <div class="form-row">
+            <label for="fromLocation">From</label>
+            <input type="text" id="fromLocation" placeholder="Enter starting point">
+            <button class="btn btn-ghost btn-sm location-btn" data-location="from" data-preset="home">🏠 Home</button>
+            <button class="btn btn-ghost btn-sm location-btn" data-location="from" data-preset="work">🏢 Work</button>
+          </div>
+          <div class="form-row">
+            <label for="toLocation">To</label>
+            <input type="text" id="toLocation" placeholder="Enter destination">
+            <button class="btn btn-ghost btn-sm location-btn" data-location="to" data-preset="home">🏠 Home</button>
+            <button class="btn btn-ghost btn-sm location-btn" data-location="to" data-preset="work">🏢 Work</button>
+          </div>
+          <div class="form-row">
+            <label for="departTime">Depart</label>
+            <select id="departTime">
+              <option value="now">Leave Now</option>
+              <option value="morning">Tomorrow 7:30 AM</option>
+              <option value="evening">Today 5:00 PM</option>
+            </select>
+          </div>
+          <div class="mode-selector">
+            <label>Travel Mode</label>
+            <div class="mode-buttons">
+              <button class="mode-btn active" data-mode="all">All</button>
+              <button class="mode-btn" data-mode="transit">🚌 Transit</button>
+              <button class="mode-btn" data-mode="drive">🚗 Drive</button>
+              <button class="mode-btn" data-mode="bike">🚲 Bike</button>
+              <button class="mode-btn" data-mode="walk">🚶 Walk</button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" id="planRouteBtn">Find Best Routes</button>
+        </div>
+
+        <div class="planner-results">
+          <div id="routeResults" class="route-results">
+            <div class="empty-state">
+              <span class="empty-icon">🗺️</span>
+              <p>Enter your start and destination to see optimized routes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback" class="section">
+      <div class="section-header">
+        <h2>Community Feedback</h2>
+        <p>Help improve Brampton's transportation system for everyone</p>
+      </div>
+
+      <div class="feedback-layout">
+        <form id="feedbackForm" class="panel feedback-form">
+          <div class="form-group">
+            <label for="feedbackType">Issue Type</label>
+            <select id="feedbackType" required>
+              <option value="">Select an issue type</option>
+              <option value="traffic">Traffic Congestion</option>
+              <option value="transit-delay">Transit Delay</option>
+              <option value="signal">Traffic Signal Issue</option>
+              <option value="road">Road Condition</option>
+              <option value="safety">Safety Concern</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="feedbackLocation">Location</label>
+            <input type="text" id="feedbackLocation" placeholder="Street, intersection, or stop name" required>
+          </div>
+          <div class="form-group">
+            <label for="feedbackDetails">Details</label>
+            <textarea id="feedbackDetails" rows="4" placeholder="Describe the issue..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Submit Report</button>
+        </form>
+
+        <div class="panel">
+          <h3>Recent Community Reports</h3>
+          <div id="communityReports" class="report-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon">🚌</span>
+        <div>
+          <strong>Brampton Smart Transit & Traffic</strong>
+          <p>Developed locally for Brampton's specific needs and growth.</p>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div>
+          <h4>Features</h4>
+          <button data-nav="traffic">Traffic Updates</button>
+          <button data-nav="transit">Transit Tracking</button>
+          <button data-nav="commute">Commute Planner</button>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <a href="mailto:support@bramptonsmarttransit.ca">support@bramptonsmarttransit.ca</a>
+          <a href="tel:+19054551234">(905) 455-1234</a>
+        </div>
+        <div>
+          <h4>Privacy</h4>
+          <p>Your data is protected according to local standards. We use anonymized insights to improve routing and traffic management.</p>
+        </div>
+      </div>
+      <p class="footer-copy">&copy; 2026 Brampton Smart Transit & Traffic. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay hidden" id="authModal">
+    <div class="modal" role="dialog" aria-labelledby="authTitle">
+      <button class="modal-close" id="authModalClose" aria-label="Close">&times;</button>
+      <div id="authSignIn" class="auth-panel">
+        <h2 id="authTitle">Sign In</h2>
+        <p class="auth-subtitle">Welcome back to Brampton Smart Transit</p>
+        <form id="signInForm">
+          <div class="form-group">
+            <label for="signInEmail">Email</label>
+            <input type="email" id="signInEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="signInPassword">Password</label>
+            <input type="password" id="signInPassword" placeholder="Your password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+        <div class="social-auth">
+          <p>Or continue with</p>
+          <div class="social-buttons">
+            <button class="btn btn-social" data-provider="google">Google</button>
+            <button class="btn btn-social" data-provider="apple">Apple</button>
+          </div>
+        </div>
+        <p class="auth-switch">Don't have an account? <button id="showSignUp">Sign up</button></p>
+      </div>
+      <div id="authSignUp" class="auth-panel hidden">
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Get started with your free Brampton Smart Transit account</p>
+        <form id="signUpForm">
+          <div class="form-group">
+            <label for="signUpName">Full Name</label>
+            <input type="text" id="signUpName" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="signUpEmail">Email</label>
+            <input type="email" id="signUpEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="signUpPassword">Password</label>
+            <input type="password" id="signUpPassword" placeholder="Create a password" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        </form>
+        <div class="social-auth">
+          <p>Or sign up with</p>
+          <div class="social-buttons">
+            <button class="btn btn-social" data-provider="google">Google</button>
+            <button class="btn btn-social" data-provider="apple">Apple</button>
+          </div>
+        </div>
+        <p class="auth-switch">Already have an account? <button id="showSignIn">Sign in</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal-overlay hidden" id="profileModal">
+    <div class="modal" role="dialog" aria-labelledby="profileTitle">
+      <button class="modal-close" id="profileModalClose" aria-label="Close">&times;</button>
+      <h2 id="profileTitle">Your Profile</h2>
+      <p class="auth-subtitle">Set your locations for personalized route suggestions</p>
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="profileName">Name</label>
+          <input type="text" id="profileName" placeholder="Your name">
+        </div>
+        <div class="form-group">
+          <label for="homeLocation">🏠 Home Location</label>
+          <input type="text" id="homeLocation" placeholder="e.g., 45 Main St N, Brampton">
+        </div>
+        <div class="form-group">
+          <label for="workLocation">🏢 Work Location</label>
+          <input type="text" id="workLocation" placeholder="e.g., Bramalea City Centre">
+        </div>
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enableNotifications" checked>
+            Enable live travel alerts and notifications
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Profile</button>
+        <button type="button" class="btn btn-ghost btn-block" id="signOutBtn">Sign Out</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast hidden" id="toast" role="alert"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
