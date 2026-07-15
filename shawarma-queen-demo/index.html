@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shawarma Queen | Brampton</title>
+  <meta name="description" content="Shawarma Queen — fresh shawarma, falafel, and Middle Eastern favourites in Brampton. Dine in or takeout.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a227;
+      --gold-light: #e8c84a;
+      --red: #8b1e1e;
+      --red-dark: #5c1212;
+      --cream: #faf6ee;
+      --charcoal: #1a1a1a;
+      --muted: #6b6560;
+      --white: #ffffff;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Source Sans 3", sans-serif;
+      background: var(--cream);
+      color: var(--charcoal);
+      line-height: 1.6;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .demo-banner {
+      background: var(--red-dark);
+      color: var(--white);
+      text-align: center;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(26, 26, 26, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(201, 162, 39, 0.25);
+    }
+
+    .nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-family: "Playfair Display", serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      white-space: nowrap;
+    }
+
+    .logo span {
+      color: var(--white);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .nav-links a {
+      color: rgba(255, 255, 255, 0.85);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold-light);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.5rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--charcoal);
+      box-shadow: 0 8px 24px rgba(201, 162, 39, 0.35);
+    }
+
+    .btn-red {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 0 8px 24px rgba(139, 30, 30, 0.3);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .hero {
+      min-height: 88vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--charcoal);
+      color: var(--white);
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 3rem 4rem max(1.5rem, calc((100vw - 1100px) / 2 + 1.5rem));
+      gap: 1.25rem;
+    }
+
+    .eyebrow {
+      color: var(--gold-light);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    .hero h1 {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      line-height: 1.05;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: rgba(255, 255, 255, 0.78);
+      max-width: 32rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .hero-image {
+      position: relative;
+      min-height: 400px;
+      background:
+        linear-gradient(135deg, rgba(92, 18, 18, 0.15), rgba(26, 26, 26, 0.5)),
+        url("https://images.unsplash.com/photo-1529006557810-274b5b5c8707?auto=format&fit=crop&w=1200&q=80") center / cover no-repeat;
+    }
+
+    .hero-badge {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--charcoal);
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+      font-weight: 600;
+    }
+
+    .hero-badge strong {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--red);
+    }
+
+    section {
+      padding: 5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-head h2 {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      max-width: 36rem;
+      margin: 0 auto;
+      font-size: 1.05rem;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .about-card {
+      background: var(--white);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .about-card h3 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .about-photo {
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      min-height: 380px;
+      background:
+        url("https://images.unsplash.com/photo-1633945274405-2c2c4bb7ce16?auto=format&fit=crop&w=900&q=80") center / cover no-repeat;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .feature {
+      background: var(--cream);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--red);
+    }
+
+    .menu {
+      background: var(--white);
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .menu-category {
+      background: var(--cream);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-category h3 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.45rem;
+      color: var(--red-dark);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    }
+
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-item span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: block;
+      margin-top: 0.15rem;
+    }
+
+    .menu-item .price {
+      font-weight: 700;
+      color: var(--red);
+      white-space: nowrap;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .info-card {
+      background: var(--white);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .info-card .icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-card h3 {
+      font-family: "Playfair Display", serif;
+      margin-bottom: 0.75rem;
+      font-size: 1.35rem;
+    }
+
+    .hours-list {
+      list-style: none;
+      text-align: left;
+      display: inline-block;
+    }
+
+    .hours-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .map-section {
+      background: var(--charcoal);
+      color: var(--white);
+    }
+
+    .map-wrap {
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-top: 2rem;
+      border: 3px solid rgba(201, 162, 39, 0.35);
+    }
+
+    .map-wrap iframe {
+      width: 100%;
+      height: 380px;
+      border: 0;
+      display: block;
+    }
+
+    .cta {
+      text-align: center;
+      background: linear-gradient(135deg, var(--red-dark), var(--red));
+      color: var(--white);
+    }
+
+    .cta h2 {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      margin-bottom: 1rem;
+    }
+
+    .cta p {
+      opacity: 0.9;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    footer {
+      background: #111;
+      color: rgba(255, 255, 255, 0.65);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .mobile-call {
+      display: none;
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      z-index: 200;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-image {
+        min-height: 280px;
+      }
+
+      .hero-content {
+        padding: 3rem 1.5rem 2rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .about-grid,
+      .menu-grid,
+      .info-grid,
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-call {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">Website Demo for Shawarma Queen — Preview Only</div>
+
+  <header>
+    <nav class="nav">
+      <a href="#" class="logo">Shawarma <span>Queen</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#visit">Visit</a></li>
+      </ul>
+      <a href="tel:9054576664" class="btn btn-gold">Call Now</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">Brampton's Favourite Shawarma</p>
+      <h1>Fresh Shawarma, Made Right.</h1>
+      <p>
+        Welcome to Shawarma Queen on Gillingham Drive. Juicy chicken and beef shawarma,
+        crispy falafel, generous platters, and bold flavours — ready for dine-in or takeout.
+      </p>
+      <div class="hero-actions">
+        <a href="#menu" class="btn btn-gold">View Menu</a>
+        <a href="tel:9054576664" class="btn btn-outline">905-457-6664</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-badge">
+        <strong>Open Daily</strong>
+        10 Gillingham Dr, Brampton
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container about-grid">
+      <div class="about-card">
+        <h3>Real Food. Big Portions. Local Favourite.</h3>
+        <p>
+          At Shawarma Queen, we serve hearty Middle Eastern classics the way people love them —
+          fresh wraps, loaded platters, golden fries, and homemade garlic sauce on everything.
+        </p>
+        <p style="margin-top: 1rem;">
+          Whether you're grabbing lunch on the go or feeding the family, we've got something
+          satisfying waiting for you.
+        </p>
+        <div class="features">
+          <div class="feature">
+            <strong>Dine In</strong>
+            Comfortable seating for a quick bite or family meal.
+          </div>
+          <div class="feature">
+            <strong>Takeout</strong>
+            Call ahead and pick up fresh, hot, and ready.
+          </div>
+          <div class="feature">
+            <strong>Fresh Daily</strong>
+            Meats marinated and prepared throughout the day.
+          </div>
+        </div>
+      </div>
+      <div class="about-photo" aria-label="Shawarma platter"></div>
+    </div>
+  </section>
+
+  <section id="menu" class="menu">
+    <div class="container">
+      <div class="section-head">
+        <h2>Our Menu</h2>
+        <p>Sample menu for demo purposes — final items and prices can be updated with your real menu.</p>
+      </div>
+
+      <div class="menu-grid">
+        <div class="menu-category">
+          <h3>Shawarma Wraps</h3>
+          <div class="menu-item">
+            <div>Chicken Shawarma Wrap<span>Lettuce, tomatoes, pickles, garlic sauce</span></div>
+            <div class="price">$11.99</div>
+          </div>
+          <div class="menu-item">
+            <div>Beef Shawarma Wrap<span>Onions, tahini, fresh vegetables</span></div>
+            <div class="price">$12.99</div>
+          </div>
+          <div class="menu-item">
+            <div>Mixed Shawarma Wrap<span>Chicken & beef combo</span></div>
+            <div class="price">$13.49</div>
+          </div>
+          <div class="menu-item">
+            <div>Falafel Wrap<span>Crispy falafel, hummus, veggies</span></div>
+            <div class="price">$10.99</div>
+          </div>
+        </div>
+
+        <div class="menu-category">
+          <h3>Platters & Bowls</h3>
+          <div class="menu-item">
+            <div>Chicken Shawarma Platter<span>Rice, salad, hummus, pita</span></div>
+            <div class="price">$15.99</div>
+          </div>
+          <div class="menu-item">
+            <div>Beef Shawarma Platter<span>Fries, garlic sauce, grilled vegetables</span></div>
+            <div class="price">$16.99</div>
+          </div>
+          <div class="menu-item">
+            <div>Shawarma on Fries<span>Loaded fries with your choice of meat</span></div>
+            <div class="price">$14.49</div>
+          </div>
+          <div class="menu-item">
+            <div>Falafel Platter<span>Salad, rice, tahini, warm pita</span></div>
+            <div class="price">$14.99</div>
+          </div>
+        </div>
+
+        <div class="menu-category">
+          <h3>Sides & Extras</h3>
+          <div class="menu-item">
+            <div>Hummus & Pita<span>Freshly made hummus</span></div>
+            <div class="price">$6.99</div>
+          </div>
+          <div class="menu-item">
+            <div>French Fries<span>Crispy golden fries</span></div>
+            <div class="price">$4.99</div>
+          </div>
+          <div class="menu-item">
+            <div>Garlic Potatoes<span>Seasoned potato bites</span></div>
+            <div class="price">$5.49</div>
+          </div>
+          <div class="menu-item">
+            <div>Extra Garlic Sauce<span>Because you always need more</span></div>
+            <div class="price">$1.00</div>
+          </div>
+        </div>
+
+        <div class="menu-category">
+          <h3>Drinks</h3>
+          <div class="menu-item">
+            <div>Soft Drinks<span>Cans & bottles</span></div>
+            <div class="price">$2.49</div>
+          </div>
+          <div class="menu-item">
+            <div>Bottled Water<span></span></div>
+            <div class="price">$2.00</div>
+          </div>
+          <div class="menu-item">
+            <div>Juice Boxes<span></span></div>
+            <div class="price">$2.25</div>
+          </div>
+          <div class="menu-item">
+            <div>Ayran<span>Traditional yogurt drink</span></div>
+            <div class="price">$3.49</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="visit">
+    <div class="container">
+      <div class="section-head">
+        <h2>Visit Us</h2>
+        <p>Find us on Gillingham Drive in Brampton. Call ahead for takeout.</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="icon">📍</div>
+          <h3>Location</h3>
+          <p>10 Gillingham Dr<br>Brampton, ON L6X 5A5</p>
+        </div>
+
+        <div class="info-card">
+          <div class="icon">📞</div>
+          <h3>Phone</h3>
+          <p><a href="tel:9054576664" style="color: var(--red); font-weight: 700;">905-457-6664</a></p>
+          <p style="margin-top: 0.5rem; color: var(--muted);">Call for takeout orders</p>
+        </div>
+
+        <div class="info-card">
+          <div class="icon">🕐</div>
+          <h3>Hours</h3>
+          <ul class="hours-list">
+            <li><span>Mon – Thu</span><span>11am – 10pm</span></li>
+            <li><span>Fri – Sat</span><span>11am – 11pm</span></li>
+            <li><span>Sunday</span><span>12pm – 9pm</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="map-section">
+    <div class="container">
+      <div class="section-head">
+        <h2 style="color: var(--gold-light);">Find Us on the Map</h2>
+        <p style="color: rgba(255,255,255,0.75);">10 Gillingham Dr, Brampton — easy to find, plenty of parking nearby.</p>
+      </div>
+      <div class="map-wrap">
+        <iframe
+          title="Shawarma Queen location"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2880.2!2d-79.78!3d43.71!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTAgR2lsbGluZ2hhbSBEciwgQnJhbXB0b24sIE9OIEw2WCA1QTUsIENhbmFkYQ!5e0!3m2!1sen!2sca!4v1">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Craving Shawarma Tonight?</h2>
+      <p>Call us to place your takeout order or stop by for dine-in.</p>
+      <a href="tel:9054576664" class="btn btn-gold">Call 905-457-6664</a>
+    </div>
+  </section>
+
+  <footer>
+  <p>&copy; 2026 Shawarma Queen · 10 Gillingham Dr, Brampton, ON · Demo Website Preview</p>
+  </footer>
+
+  <a href="tel:9054576664" class="mobile-call btn btn-red">📞 Call Now</a>
+</body>
+</html>
