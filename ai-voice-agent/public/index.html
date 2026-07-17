@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Voice Agent — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">VoiceAI</div>
+        <div class="brand-sub">Business Agent</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="#" class="nav-item" data-section="calls">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.27 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Call Logs
+      </a>
+      <a href="#" class="nav-item" data-section="leads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Leads
+      </a>
+      <a href="#" class="nav-item" data-section="setup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Setup Guide
+      </a>
+    </nav>
+
+    <div class="sidebar-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Connecting…</span>
+    </div>
+  </aside>
+
+  <!-- ── Main content ────────────────────────────────────────────────── -->
+  <main class="main">
+    <!-- Header -->
+    <header class="topbar">
+      <div>
+        <h1 class="page-title" id="pageTitle">Overview</h1>
+        <p class="page-sub" id="pageSub">Real-time AI voice agent dashboard</p>
+      </div>
+      <div class="topbar-right">
+        <div class="agent-badge" id="agentBadge">
+          <div class="pulse-ring"></div>
+          <span id="agentName">Agent</span>
+        </div>
+        <span class="uptime" id="uptime">Uptime: —</span>
+      </div>
+    </header>
+
+    <!-- ── Overview section ─────────────────────────────────────────── -->
+    <section id="section-overview" class="section active">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon calls-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.27 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalCalls">—</div>
+            <div class="stat-label">Total Calls Handled</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon active-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="activeCalls">—</div>
+            <div class="stat-label">Active Calls Now</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon leads-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalLeads">—</div>
+            <div class="stat-label">Leads Captured</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon escalation-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="escalatedCalls">—</div>
+            <div class="stat-label">Escalated to Human</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Recent calls -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Recent Calls</h2>
+            <span class="badge badge-blue" id="recentCallsBadge">0</span>
+          </div>
+          <div id="recentCallsList" class="call-list">
+            <div class="empty-state">No calls yet. Waiting for the first call…</div>
+          </div>
+        </div>
+
+        <!-- Recent leads -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Recent Leads</h2>
+            <span class="badge badge-green" id="recentLeadsBadge">0</span>
+          </div>
+          <div id="recentLeadsList" class="lead-list">
+            <div class="empty-state">No leads captured yet.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Call Logs section ─────────────────────────────────────────── -->
+    <section id="section-calls" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">All Call Sessions</h2>
+          <button class="btn btn-sm" onclick="refreshCalls()">Refresh</button>
+        </div>
+        <div id="callsTable" class="table-wrap">
+          <div class="empty-state">No calls recorded yet.</div>
+        </div>
+      </div>
+
+      <!-- Call transcript modal -->
+      <div id="transcriptModal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeModal()"></div>
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3 id="modalTitle">Call Transcript</h3>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+          </div>
+          <div id="modalBody" class="transcript"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Leads section ─────────────────────────────────────────────── -->
+    <section id="section-leads" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Captured Leads</h2>
+          <button class="btn btn-sm" onclick="refreshLeads()">Refresh</button>
+        </div>
+        <div id="leadsTable" class="table-wrap">
+          <div class="empty-state">No leads captured yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Setup Guide section ───────────────────────────────────────── -->
+    <section id="section-setup" class="section">
+      <div class="setup-grid">
+        <div class="card setup-card">
+          <div class="setup-step">
+            <div class="step-num">1</div>
+            <div>
+              <h3>Configure Environment</h3>
+              <p>Copy <code>.env.example</code> to <code>.env</code> and fill in your credentials.</p>
+              <div class="code-block">cp .env.example .env</div>
+            </div>
+          </div>
+        </div>
+        <div class="card setup-card">
+          <div class="setup-step">
+            <div class="step-num">2</div>
+            <div>
+              <h3>Get Your API Keys</h3>
+              <p>You'll need accounts with:</p>
+              <ul>
+                <li><a href="https://www.twilio.com" target="_blank">Twilio</a> — phone number + auth token</li>
+                <li><a href="https://platform.openai.com" target="_blank">OpenAI</a> — API key</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card setup-card">
+          <div class="setup-step">
+            <div class="step-num">3</div>
+            <div>
+              <h3>Expose Your Server</h3>
+              <p>Use <a href="https://ngrok.com" target="_blank">ngrok</a> to expose your local server to the internet for Twilio webhooks.</p>
+              <div class="code-block">ngrok http 3000</div>
+            </div>
+          </div>
+        </div>
+        <div class="card setup-card">
+          <div class="setup-step">
+            <div class="step-num">4</div>
+            <div>
+              <h3>Configure Twilio Webhook</h3>
+              <p>In your Twilio phone number settings, set the "A call comes in" webhook to:</p>
+              <div class="code-block">https://&lt;your-ngrok-url&gt;/call/incoming</div>
+              <p>Also set the Status Callback URL to:</p>
+              <div class="code-block">https://&lt;your-ngrok-url&gt;/call/status</div>
+            </div>
+          </div>
+        </div>
+        <div class="card setup-card">
+          <div class="setup-step">
+            <div class="step-num">5</div>
+            <div>
+              <h3>Set Up Call Forwarding</h3>
+              <p>On your business phone, enable "No Answer Forwarding" to your Twilio number. The AI will pick up when you miss the call.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card setup-card">
+          <div class="setup-step">
+            <div class="step-num">6</div>
+            <div>
+              <h3>Start the Server</h3>
+              <div class="code-block">npm start</div>
+              <p>Your AI voice agent is now live and ready to handle missed calls!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Environment variables reference -->
+      <div class="card" style="margin-top: 1.5rem;">
+        <div class="card-header">
+          <h2 class="card-title">Environment Variables Reference</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Variable</th><th>Description</th><th>Required</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI API key for conversation AI</td><td><span class="badge badge-red">Required</span></td></tr>
+              <tr><td><code>TWILIO_AUTH_TOKEN</code></td><td>Twilio auth token (for signature validation)</td><td><span class="badge badge-red">Required</span></td></tr>
+              <tr><td><code>BUSINESS_NAME</code></td><td>Your business name</td><td><span class="badge badge-yellow">Recommended</span></td></tr>
+              <tr><td><code>BUSINESS_HOURS</code></td><td>Business hours string (e.g. "Mon–Fri 9AM–5PM")</td><td><span class="badge badge-yellow">Recommended</span></td></tr>
+              <tr><td><code>BUSINESS_SERVICES</code></td><td>Comma-separated list of services offered</td><td><span class="badge badge-yellow">Recommended</span></td></tr>
+              <tr><td><code>BUSINESS_CONTEXT</code></td><td>Any additional info the AI should know</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>AGENT_NAME</code></td><td>AI agent's name (default: Aria)</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>AGENT_VOICE</code></td><td>Twilio voice (default: Polly.Joanna-Neural)</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>ESCALATION_PHONE</code></td><td>Phone number to transfer urgent calls to</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>LEAD_WEBHOOK_URL</code></td><td>URL to POST new lead data (e.g. Zapier, Make)</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>OPENAI_MODEL</code></td><td>OpenAI model (default: gpt-4o-mini)</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>PORT</code></td><td>Server port (default: 3000)</td><td><span class="badge badge-gray">Optional</span></td></tr>
+              <tr><td><code>VALIDATE_TWILIO_SIGNATURE</code></td><td>Set "true" in production to verify Twilio requests</td><td><span class="badge badge-gray">Optional</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

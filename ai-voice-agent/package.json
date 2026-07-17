@@ -1,0 +1,25 @@
+{
+  "name": "ai-voice-agent",
+  "version": "1.0.0",
+  "description": "AI voice agent that handles missed business calls via Twilio and OpenAI",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": ["twilio", "openai", "voice", "ai", "business"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "morgan": "^1.11.0",
+    "openai": "^6.48.0",
+    "twilio": "^6.0.2",
+    "uuid": "^14.0.1",
+    "ws": "^8.21.1"
+  }
+}
