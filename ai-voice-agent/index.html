@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Answerly — AI Voice Agent That Answers Your Missed Calls</title>
+  <meta name="description" content="Answerly is a professional AI voice agent that instantly answers missed business calls, books appointments, answers questions, and texts you every lead — 24/7." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236c5cff'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23ffffff' font-family='Arial'%3E%E2%97%97%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="demo-banner">Interactive Demo — click “Simulate a Missed Call” below to hear the AI agent live in your browser</div>
+
+  <header>
+    <nav class="nav container">
+      <a href="#top" class="logo">
+        <span class="logo-mark">◗)</span> Answerly<span class="dot">.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#demo">Live Demo</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <a href="#demo" class="btn btn-primary">Try It Live</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="pill"><span class="live-dot"></span> Answers in under 2 rings · 24/7</span>
+          <h1>When you miss the call,<br /><span class="grad">Answerly picks it up.</span></h1>
+          <p class="lede">
+            Every missed call is a lost customer. Answerly is a professional AI voice
+            agent that answers instantly, sounds human, books appointments, answers
+            your customers’ questions, and texts you every lead — day or night.
+          </p>
+          <div class="hero-actions">
+            <a href="#demo" class="btn btn-primary btn-lg">▶ Hear the AI live</a>
+            <a href="#pricing" class="btn btn-ghost btn-lg">See pricing</a>
+          </div>
+          <div class="hero-stats">
+            <div><strong>62%</strong><span>of callers never call back after a missed call</span></div>
+            <div><strong>&lt;2s</strong><span>average answer time</span></div>
+            <div><strong>24/7</strong><span>never sleeps, never on lunch</span></div>
+          </div>
+        </div>
+
+        <!-- Phone mockup / live demo mount -->
+        <div class="hero-phone">
+          <div class="phone" id="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="call-status" id="callStatus">
+                <div class="avatar" id="avatar">◗)</div>
+                <div class="call-name">Answerly AI Reception</div>
+                <div class="call-sub" id="callSub">Tap below to simulate an incoming call</div>
+                <div class="waveform" id="waveform" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <div class="call-timer" id="callTimer">00:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-glow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section id="demo" class="section demo-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Live, in-browser demo</span>
+          <h2>Miss a call. Watch the AI handle it.</h2>
+          <p>
+            This is a real, working voice agent running entirely in your browser — no
+            phone number required. Click below, allow the microphone, and talk to it like
+            a real caller. Ask about hours, prices, or book an appointment.
+          </p>
+        </div>
+
+        <div class="demo-shell">
+          <!-- Controls + transcript -->
+          <div class="demo-main">
+            <div class="demo-controls">
+              <button id="startCall" class="btn btn-primary btn-lg">📞 Simulate a Missed Call</button>
+              <button id="endCall" class="btn btn-danger btn-lg" disabled>■ End Call</button>
+              <button id="micToggle" class="btn btn-ghost" disabled title="Type instead of speaking">⌨ Type instead</button>
+            </div>
+
+            <div class="mic-row" id="micRow" hidden>
+              <input type="text" id="textInput" placeholder="Type what you'd say as the caller, then press Enter…" />
+              <button id="sendText" class="btn btn-primary">Send</button>
+            </div>
+
+            <div class="transcript" id="transcript" aria-live="polite">
+              <div class="transcript-empty" id="transcriptEmpty">
+                <div class="te-icon">🎙️</div>
+                <p>Your live conversation with the AI agent will appear here.</p>
+                <small>Works best in Chrome, Edge, or Safari with a microphone. No mic? Use “Type instead”.</small>
+              </div>
+            </div>
+
+            <div class="listen-hint" id="listenHint" hidden>
+              <span class="live-dot"></span> Listening… speak naturally, then pause.
+            </div>
+          </div>
+
+          <!-- Live side panel: what the AI is doing -->
+          <aside class="demo-side">
+            <div class="side-card business-card">
+              <div class="side-title">Answering as</div>
+              <div class="biz-name" id="bizName">Bright Smile Dental</div>
+              <div class="biz-line" id="bizType">Dental clinic · Brampton, ON</div>
+              <button id="switchBiz" class="btn btn-mini">↺ Switch business type</button>
+            </div>
+
+            <div class="side-card">
+              <div class="side-title">Captured this call</div>
+              <ul class="capture" id="captureList">
+                <li data-key="intent"><span>Reason</span><b>—</b></li>
+                <li data-key="name"><span>Caller name</span><b>—</b></li>
+                <li data-key="phone"><span>Callback #</span><b>—</b></li>
+                <li data-key="details"><span>Details</span><b>—</b></li>
+              </ul>
+            </div>
+
+            <div class="side-card notify-card" id="notifyCard" hidden>
+              <div class="side-title">✅ Sent to the business owner</div>
+              <div class="sms-bubble" id="smsBubble"></div>
+            </div>
+          </aside>
+        </div>
+
+        <p class="demo-disclaimer">
+          Demo uses your browser’s built-in speech engine. The production service uses a
+          real phone number, studio-quality voices, and a live LLM — see “How It Works”.
+        </p>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section alt">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">How it works</span>
+          <h2>Live on your existing number in three steps</h2>
+          <p>No new hardware. No new number to advertise. It plugs into the phone line you already have.</p>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>Forward missed calls</h3>
+            <p>We set your line to forward calls that go unanswered (or all calls after hours) to your Answerly number. Takes minutes with your carrier.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>The AI answers &amp; talks</h3>
+            <p>Answerly greets the caller in a natural voice, understands what they need, answers questions, and books appointments straight into your calendar.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>You get the lead instantly</h3>
+            <p>The moment the call ends, you get a text and email with the caller’s name, number, reason, and a full transcript. Nothing slips through.</p>
+          </div>
+        </div>
+
+        <div class="pipeline">
+          <span>☎ Caller</span><i>→</i>
+          <span>Your line (missed)</span><i>→</i>
+          <span>Answerly</span><i>→</i>
+          <span>Speech → AI → Voice</span><i>→</i>
+          <span>📅 Booked</span><i>→</i>
+          <span>📲 You’re notified</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Built to sound human &amp; close business</span>
+          <h2>Everything a great receptionist does — automatically</h2>
+        </div>
+        <div class="features-grid">
+          <div class="feature"><div class="f-icon">🗣️</div><h3>Natural human voice</h3><p>Studio-quality, low-latency voices. Callers feel heard, not stuck in a menu.</p></div>
+          <div class="feature"><div class="f-icon">📅</div><h3>Books appointments</h3><p>Checks availability and books directly into Google Calendar, Calendly, or your PMS.</p></div>
+          <div class="feature"><div class="f-icon">❓</div><h3>Answers FAQs</h3><p>Hours, pricing, location, services, parking — trained on your business in minutes.</p></div>
+          <div class="feature"><div class="f-icon">📲</div><h3>Instant lead alerts</h3><p>Text + email the second a call ends, with transcript and captured details.</p></div>
+          <div class="feature"><div class="f-icon">🌙</div><h3>24/7 &amp; overflow</h3><p>After hours, holidays, lunch rushes, or when every line is busy — always covered.</p></div>
+          <div class="feature"><div class="f-icon">🌐</div><h3>Multilingual</h3><p>Greets and converses in English, French, Spanish, Punjabi, Hindi and more.</p></div>
+          <div class="feature"><div class="f-icon">🔁</div><h3>Smart transfer</h3><p>Detects urgent or high-value calls and warm-transfers to a human on the spot.</p></div>
+          <div class="feature"><div class="f-icon">🔒</div><h3>Private &amp; compliant</h3><p>Encrypted recordings, configurable retention, and consent messaging built in.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDUSTRIES -->
+    <section class="section alt">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Who it’s for</span>
+          <h2>Perfect for busy, call-driven businesses</h2>
+        </div>
+        <div class="chips">
+          <span>🦷 Dental &amp; medical clinics</span>
+          <span>💇 Salons &amp; barbershops</span>
+          <span>🔧 Plumbers &amp; HVAC</span>
+          <span>🍽️ Restaurants &amp; takeout</span>
+          <span>⚖️ Law firms</span>
+          <span>🏠 Real estate</span>
+          <span>🚗 Auto shops</span>
+          <span>🧹 Cleaning &amp; home services</span>
+          <span>🐾 Veterinary</span>
+          <span>💪 Gyms &amp; studios</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Simple pricing</span>
+          <h2>Costs less than a single missed customer</h2>
+          <p>No contracts. Cancel anytime. All plans include your own dedicated AI number.</p>
+        </div>
+        <div class="pricing-grid">
+          <div class="price-card">
+            <h3>Starter</h3>
+            <div class="price">$149<span>/mo</span></div>
+            <p class="price-sub">For solo operators &amp; small shops</p>
+            <ul>
+              <li>✓ Up to 150 answered calls/mo</li>
+              <li>✓ 24/7 AI voice answering</li>
+              <li>✓ FAQ + message taking</li>
+              <li>✓ Text &amp; email lead alerts</li>
+              <li>✓ Call transcripts</li>
+            </ul>
+            <a href="#contact" class="btn btn-ghost btn-block">Start free trial</a>
+          </div>
+          <div class="price-card featured">
+            <div class="ribbon">Most popular</div>
+            <h3>Professional</h3>
+            <div class="price">$349<span>/mo</span></div>
+            <p class="price-sub">For growing, appointment-based businesses</p>
+            <ul>
+              <li>✓ Up to 600 answered calls/mo</li>
+              <li>✓ Everything in Starter</li>
+              <li>✓ Appointment booking + calendar sync</li>
+              <li>✓ Warm transfer to staff</li>
+              <li>✓ Multilingual answering</li>
+              <li>✓ Custom voice &amp; scripts</li>
+            </ul>
+            <a href="#contact" class="btn btn-primary btn-block">Start free trial</a>
+          </div>
+          <div class="price-card">
+            <h3>Enterprise</h3>
+            <div class="price">Custom</div>
+            <p class="price-sub">Multi-location &amp; high volume</p>
+            <ul>
+              <li>✓ Unlimited calls</li>
+              <li>✓ CRM / PMS integrations</li>
+              <li>✓ Dedicated numbers per location</li>
+              <li>✓ Analytics dashboard &amp; SLAs</li>
+              <li>✓ Priority support</li>
+            </ul>
+            <a href="#contact" class="btn btn-ghost btn-block">Talk to sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section alt">
+      <div class="container narrow">
+        <div class="section-head">
+          <span class="eyebrow">FAQ</span>
+          <h2>Questions, answered</h2>
+        </div>
+        <div class="faq">
+          <details><summary>Do I need a new phone number?</summary><p>No. Answerly works with the number you already have. You simply forward unanswered or after-hours calls to your dedicated Answerly number — your customers keep dialing the same line.</p></details>
+          <details><summary>Will callers know it’s an AI?</summary><p>The voice is natural and conversational. You choose whether it introduces itself as a virtual assistant. Most businesses do, and customers are happy as long as they get help fast.</p></details>
+          <details><summary>Can it actually book appointments?</summary><p>Yes. On the Professional plan it connects to Google Calendar, Calendly, or your booking system, checks real availability, and confirms the appointment on the call.</p></details>
+          <details><summary>What happens for something the AI can’t handle?</summary><p>It gracefully takes a detailed message, or on eligible plans warm-transfers to a staff member. You’re always notified instantly with the full context.</p></details>
+          <details><summary>How fast can I go live?</summary><p>Most businesses are live the same day. We build your script, train it on your services, provision your number, and help you set up call forwarding.</p></details>
+          <details><summary>Is this the demo I’m using now?</summary><p>The demo above runs on your browser’s speech engine so you can try it with zero setup. Production uses a real phone number, premium voices, and a live LLM — see the technical reference in the project’s <code>server/</code> folder.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA / CONTACT -->
+    <section id="contact" class="section cta">
+      <div class="container narrow cta-inner">
+        <h2>Stop losing customers to voicemail.</h2>
+        <p>Book a 15-minute setup call and have your AI voice agent live today.</p>
+        <form class="cta-form" id="ctaForm" novalidate>
+          <input type="text" name="name" placeholder="Your name" required />
+          <input type="text" name="business" placeholder="Business name" required />
+          <input type="tel" name="phone" placeholder="Best phone number" required />
+          <button type="submit" class="btn btn-primary btn-lg">Get my AI agent →</button>
+        </form>
+        <p class="cta-note" id="ctaNote" hidden>✅ Thanks! This is a demo form — in production this books your onboarding call instantly.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="logo"><span class="logo-mark">◗)</span> Answerly<span class="dot">.</span></div>
+      <p>AI voice agent for missed calls · Demo product · Built for local businesses.</p>
+      <p class="fine">© 2026 Answerly Demo. Not affiliated with any carrier. Demo for illustration only.</p>
+    </div>
+  </footer>
+
+  <script src="agent.js"></script>
+</body>
+</html>

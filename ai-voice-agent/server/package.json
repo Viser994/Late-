@@ -1,0 +1,21 @@
+{
+  "name": "answerly-voice-agent-server",
+  "version": "1.0.0",
+  "description": "Production reference server for the Answerly AI voice agent — answers missed business calls with Twilio + OpenAI.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "openai": "^4.56.0",
+    "twilio": "^5.2.2"
+  },
+  "license": "MIT"
+}
