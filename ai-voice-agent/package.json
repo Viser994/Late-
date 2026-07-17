@@ -1,0 +1,28 @@
+{
+  "name": "ai-missed-call-agent",
+  "version": "1.0.0",
+  "description": "Professional AI voice agent for handling missed business calls.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/openaiClient.js && node --check src/config.js"
+  },
+  "keywords": [
+    "twilio",
+    "openai",
+    "voice-agent",
+    "missed-calls",
+    "business"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "openai": "^5.10.2",
+    "twilio": "^5.10.3",
+    "zod": "^3.25.76"
+  }
+}
