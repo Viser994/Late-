@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CallGuard AI</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-icon">◉</span>
+        <span class="brand-text">CallGuard<span class="brand-ai">AI</span></span>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-panel="overview"><span class="nav-icon">▣</span> Overview</button>
+        <button class="nav-item" data-panel="configure"><span class="nav-icon">⚙</span> Configure Agent</button>
+        <button class="nav-item" data-panel="calls"><span class="nav-icon">☎</span> Call Log</button>
+        <button class="nav-item" data-panel="setup"><span class="nav-icon">⬡</span> Setup Guide</button>
+      </nav>
+      <div class="sidebar-status" id="sidebarStatus">
+        <span class="status-dot"></span>
+        <span>Checking status…</span>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Overview</h1>
+          <p id="pageSubtitle">Your AI receptionist at a glance</p>
+        </div>
+        <button class="btn btn-primary" id="saveConfigBtn" hidden>Save Changes</button>
+      </header>
+      <section class="panel active" id="panel-overview">
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-label">Agent Status</span><span class="stat-value" id="statAgentStatus">—</span><span class="stat-hint" id="statHoursHint">—</span></article>
+          <article class="stat-card"><span class="stat-label">Calls Handled</span><span class="stat-value" id="statCallsHandled">0</span><span class="stat-hint">By AI agent</span></article>
+          <article class="stat-card"><span class="stat-label">Business</span><span class="stat-value stat-value-sm" id="statBusinessName">—</span><span class="stat-hint" id="statAgentName">—</span></article>
+          <article class="stat-card"><span class="stat-label">Integrations</span><span class="stat-value stat-value-sm" id="statIntegrations">—</span><span class="stat-hint">Twilio + OpenAI</span></article>
+        </div>
+        <div class="content-grid">
+          <article class="card"><h2>How It Works</h2><ol class="flow-list"><li><strong>Call comes in</strong> to your Twilio number</li><li><strong>Your team rings first</strong> for up to 20 seconds</li><li><strong>AI picks up</strong> if no one answers</li><li><strong>Takes messages</strong> and schedules callbacks</li><li><strong>Sends SMS summary</strong> (optional)</li></ol></article>
+          <article class="card card-accent"><h2>Call Flow</h2><div class="flow-diagram"><div class="flow-node">Incoming Call</div><div class="flow-arrow">↓</div><div class="flow-node flow-node-highlight">Ring Business</div><div class="flow-arrow">↓</div><div class="flow-branch-item"><span class="flow-label">Answered</span><div class="flow-node flow-node-success">Connected</div><div class="flow-branch-item"><span class="flow-label">No Answer</span><div class="flow-node flow-node-ai">AI Agent</div></div></div></div></article>
+        </div>
+      </section>
+      <section class="panel" id="panel-configure">
+        <form class="config-form" id="configForm">
+          <div class="form-section"><h2>Business Profile</h2><div class="form-grid">
+            <label class="field"><span>Business Name</span><input type="text" name="businessName" required></label>
+            <label class="field"><span>Industry</span><input type="text" name="industry"></label>
+            <label class="field"><span>Timezone</span><select name="timezone"><option value="America/New_York">Eastern</option><option value="America/Chicago">Central</option><option value="America/Denver">Mountain</option><option value="America/Los_Angeles">Pacific</option><option value="America/Toronto">Toronto</option><option value="Europe/London">London</option></select></label>
+            <label class="field"><span>Tagline</span><input type="text" name="tagline"></label>
+          </div></div>
+          <div class="form-section"><h2>AI Agent</h2><div class="form-grid">
+            <label class="field"><span>Agent Name</span><input type="text" name="agentName"></label>
+            <label class="field"><span>Voice</span><select name="voice"><option value="Polly.Joanna-Neural">Joanna</option><option value="Polly.Matthew-Neural">Matthew</option><option value="Polly.Amy-Neural">Amy</option><option value="Polly.Brian-Neural">Brian</option></select></label>
+            <label class="field field-full"><span>Personality</span><input type="text" name="personality"></label>
+            <label class="field field-full"><span>Greeting</span><textarea name="greeting" rows="3"></textarea></label>
+            <label class="field field-full"><span>After-Hours Message</span><textarea name="afterHoursMessage" rows="2"></textarea></label>
+          </div></div>
+          <div class="form-section"><h2>Services</h2><p class="field-hint">One per line.</p><label class="field field-full"><textarea name="services" rows="5"></textarea></label></div>
+        </form>
+      </section>
+      <section class="panel" id="panel-calls">
+        <article class="card card-full"><div class="card-header"><h2>Recent Calls</h2><button class="btn btn-ghost" id="refreshCallsBtn">Refresh</button></div>
+        <div class="table-wrap"><table class="data-table" id="callsTable"><thead><tr><th>Time</th><th>From</th><th>Status</th><th>Summary</th></tr></thead><tbody id="callsTableBody"><tr><td colspan="4" class="empty-state">No calls yet</td></tr></tbody></table></div></article>
+      </section>
+      <section class="panel" id="panel-setup">
+        <article class="card card-full"><h2>Quick Setup</h2><div class="setup-steps">
+          <div class="setup-step"><span class="step-num">1</span><div><h3>Install</h3><pre><code>cd ai-voice-agent && npm install</code></pre></div></div>
+          <div class="setup-step"><span class="step-num">2</span><div><h3>Configure</h3><pre><code>cp .env.example .env</code></pre></div></div>
+          <div class="setup-step"><span class="step-num">3</span><div><h3>Expose server</h3><pre><code>ngrok http 3000</code></pre></div></div>
+          <div class="setup-step"><span class="step-num">4</span><div><h3>Twilio webhook</h3><pre><code id="webhookUrl">/voice/incoming</code></pre></div></div>
+          <div class="setup-step"><span class="step-num">5</span><div><h3>Test</h3><p>Call your Twilio number.</p></div></div>
+        </div></article>
+        <article class="card"><h2>Required API Keys</h2><ul class="checklist" id="setupChecklist">
+          <li data-key="twilio">Twilio Account SID and Auth Token</li>
+          <li data-key="twilio-phone">Twilio Phone Number</li>
+          <li data-key="business-phone">Business Phone Number</li>
+          <li data-key="openai">OpenAI API Key</li>
+        </ul></article>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

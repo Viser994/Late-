@@ -1,0 +1,35 @@
+{
+  "businessName": "Your Business",
+  "tagline": "We're here to help",
+  "industry": "general",
+  "timezone": "America/New_York",
+  "hours": {
+    "monday": { "open": "09:00", "close": "17:00" },
+    "tuesday": { "open": "09:00", "close": "17:00" },
+    "wednesday": { "open": "09:00", "close": "17:00" },
+    "thursday": { "open": "09:00", "close": "17:00" },
+    "friday": { "open": "09:00", "close": "17:00" },
+    "saturday": { "closed": true },
+    "sunday": { "closed": true }
+  },
+  "services": [
+    "General inquiries",
+    "Appointment scheduling",
+    "Order status",
+    "Callback requests"
+  ],
+  "faqs": [
+  ],
+  "greeting": "Thank you for calling {businessName}. Our team is currently assisting other customers, but I'm here to help. How can I assist you today?",
+  "voice": "Polly.Joanna-Neural",
+  "language": "en-US",
+  "agentName": "Alex",
+  "personality": "warm, professional, concise, and helpful",
+  "capabilities": {
+    "takeMessages": true,
+    "scheduleCallbacks": true,
+    "answerFAQs": true,
+    "collectContactInfo": true
+  },
+  "afterHoursMessage": "You've reached us outside of business hours. I can take a message and someone will get back to you on the next business day."
+}
