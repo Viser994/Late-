@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VocalDesk AI | Missed-Call Voice Agent for Businesses</title>
+  <meta name="description" content="A professional AI voice agent that answers missed business calls, qualifies customers, books appointments, and sends instant follow-up summaries.">
+  <style>
+    :root {
+      --ink: #07111f;
+      --navy: #0b1730;
+      --blue: #3d7cff;
+      --cyan: #35d4ff;
+      --mint: #5af0bd;
+      --white: #ffffff;
+      --soft: #f4f8ff;
+      --muted: #64748b;
+      --line: rgba(148, 163, 184, 0.22);
+      --shadow: 0 24px 70px rgba(7, 17, 31, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--soft);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .topbar {
+      background: #061020;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.9rem;
+      padding: 0.65rem 1.5rem;
+      text-align: center;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav,
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .nav {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+    }
+
+    .brand {
+      align-items: center;
+      display: inline-flex;
+      gap: 0.7rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      align-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 14px;
+      color: var(--white);
+      display: inline-flex;
+      height: 38px;
+      justify-content: center;
+      width: 38px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 650;
+    }
+
+    .btn {
+      align-items: center;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      font: inherit;
+      font-weight: 800;
+      justify-content: center;
+      padding: 0.9rem 1.35rem;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      box-shadow: 0 14px 30px rgba(61, 124, 255, 0.28);
+      color: var(--white);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: var(--white);
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at 18% 20%, rgba(53, 212, 255, 0.2), transparent 28rem),
+        radial-gradient(circle at 82% 10%, rgba(90, 240, 189, 0.18), transparent 30rem),
+        linear-gradient(135deg, #081122 0%, #10234a 58%, #07111f 100%);
+      color: var(--white);
+      overflow: hidden;
+      padding: 6rem 1.5rem 5rem;
+    }
+
+    .hero-grid {
+      align-items: center;
+      display: grid;
+      gap: 3rem;
+      grid-template-columns: minmax(0, 1fr) 430px;
+    }
+
+    .eyebrow {
+      color: var(--mint);
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 6vw, 5.9rem);
+      letter-spacing: -0.07em;
+      line-height: 0.95;
+      max-width: 780px;
+    }
+
+    .hero-copy {
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 1.2rem;
+      margin: 1.4rem 0 1.8rem;
+      max-width: 650px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      list-style: none;
+    }
+
+    .trust-row li {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.92rem;
+      padding: 0.55rem 0.85rem;
+    }
+
+    .phone-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      padding: 1.1rem;
+    }
+
+    .phone-screen {
+      background: #07111f;
+      border-radius: 26px;
+      min-height: 560px;
+      padding: 1.4rem;
+      position: relative;
+    }
+
+    .call-status {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.85rem;
+      margin-bottom: 1.3rem;
+    }
+
+    .pulse {
+      background: var(--mint);
+      border-radius: 50%;
+      box-shadow: 0 0 0 9px rgba(90, 240, 189, 0.14);
+      display: inline-block;
+      height: 10px;
+      width: 10px;
+    }
+
+    .caller {
+      text-align: center;
+      padding: 1rem 0 1.4rem;
+    }
+
+    .avatar {
+      align-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 50%;
+      display: inline-flex;
+      font-size: 2.2rem;
+      height: 86px;
+      justify-content: center;
+      margin-bottom: 1rem;
+      width: 86px;
+    }
+
+    .caller h2 {
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+    }
+
+    .caller p {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.95rem;
+    }
+
+    .transcript {
+      display: grid;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+
+    .bubble {
+      border-radius: 18px;
+      max-width: 88%;
+      padding: 0.8rem 0.95rem;
+      font-size: 0.92rem;
+    }
+
+    .bubble.ai {
+      background: rgba(61, 124, 255, 0.18);
+      border: 1px solid rgba(61, 124, 255, 0.28);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .bubble.customer {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.74);
+      justify-self: end;
+    }
+
+    .call-summary {
+      background: rgba(90, 240, 189, 0.11);
+      border: 1px solid rgba(90, 240, 189, 0.26);
+      border-radius: 18px;
+      color: rgba(255, 255, 255, 0.82);
+      margin-top: 1rem;
+      padding: 1rem;
+    }
+
+    .call-summary strong {
+      color: var(--mint);
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    section {
+      padding: 5rem 1.5rem;
+    }
+
+    .section-head {
+      margin: 0 auto 3rem;
+      max-width: 720px;
+      text-align: center;
+    }
+
+    .section-head h2 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -0.05em;
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      gap: 1.2rem;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 16px 45px rgba(15, 23, 42, 0.06);
+      padding: 1.6rem;
+    }
+
+    .card-icon {
+      align-items: center;
+      background: #edf5ff;
+      border-radius: 16px;
+      color: var(--blue);
+      display: inline-flex;
+      font-size: 1.45rem;
+      height: 48px;
+      justify-content: center;
+      margin-bottom: 1rem;
+      width: 48px;
+    }
+
+    .card h3 {
+      font-size: 1.18rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.55rem;
+    }
+
+    .card p {
+      color: var(--muted);
+    }
+
+    .workflow {
+      background: var(--white);
+    }
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 1.35rem;
+      position: relative;
+    }
+
+    .step::before {
+      align-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 50%;
+      color: var(--white);
+      content: counter(step);
+      counter-increment: step;
+      display: flex;
+      font-weight: 900;
+      height: 34px;
+      justify-content: center;
+      margin-bottom: 1rem;
+      width: 34px;
+    }
+
+    .industries {
+      background:
+        linear-gradient(135deg, rgba(11, 23, 48, 0.94), rgba(9, 30, 66, 0.94)),
+        radial-gradient(circle at 15% 20%, rgba(53, 212, 255, 0.3), transparent 24rem);
+      color: var(--white);
+    }
+
+    .industries .section-head p {
+      color: rgba(255, 255, 255, 0.68);
+    }
+
+    .industry-list {
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: repeat(4, 1fr);
+      list-style: none;
+    }
+
+    .industry-list li {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 18px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .demo-panel {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: 0.95fr 1.05fr;
+      align-items: stretch;
+    }
+
+    .demo-box,
+    .lead-form {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+      padding: 2rem;
+    }
+
+    .demo-output {
+      background: #07111f;
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 1rem;
+      min-height: 170px;
+      padding: 1.2rem;
+      white-space: pre-line;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.2rem;
+    }
+
+    .chip {
+      background: #edf5ff;
+      border: 1px solid #dbeafe;
+      border-radius: 999px;
+      color: #1d4ed8;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 750;
+      padding: 0.7rem 0.95rem;
+    }
+
+    form {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    label {
+      color: #334155;
+      display: grid;
+      font-size: 0.92rem;
+      font-weight: 800;
+      gap: 0.45rem;
+    }
+
+    input,
+    select,
+    textarea {
+      border: 1px solid #d7deea;
+      border-radius: 14px;
+      color: var(--ink);
+      font: inherit;
+      padding: 0.9rem 1rem;
+      width: 100%;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .final-cta {
+      background: linear-gradient(135deg, var(--blue), #173a89);
+      color: var(--white);
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      font-size: clamp(2.1rem, 4vw, 3.5rem);
+      letter-spacing: -0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .final-cta p {
+      color: rgba(255, 255, 255, 0.78);
+      margin: 0 auto 1.5rem;
+      max-width: 680px;
+    }
+
+    footer {
+      background: #061020;
+      color: rgba(255, 255, 255, 0.62);
+      padding: 1.4rem 1.5rem;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .demo-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .phone-card {
+        max-width: 460px;
+      }
+
+      .grid-3,
+      .steps,
+      .industry-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .nav-links,
+      .nav .btn {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 4rem;
+      }
+
+      .grid-3,
+      .steps,
+      .industry-list,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phone-screen {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">Professional missed-call coverage for local businesses, service teams, clinics, restaurants, and sales offices.</div>
+
+  <header>
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#">
+        <span class="brand-mark">AI</span>
+        <span>VocalDesk AI</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#workflow">Workflow</a></li>
+        <li><a href="#demo">Demo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="#contact">Build My Agent</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">AI voice agent for missed calls</p>
+          <h1>Never lose a customer because nobody picked up.</h1>
+          <p class="hero-copy">
+            VocalDesk AI answers missed calls in a natural voice, captures the caller's need,
+            books appointments, qualifies leads, and sends your team a clean summary in seconds.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#contact">Get a Professional Setup</a>
+            <a class="btn btn-secondary" href="#demo">Try the Call Flow</a>
+          </div>
+          <ul class="trust-row" aria-label="Voice agent benefits">
+            <li>24/7 call pickup</li>
+            <li>Human-like conversation</li>
+            <li>SMS and email follow-up</li>
+            <li>Appointment booking ready</li>
+          </ul>
+        </div>
+
+        <aside class="phone-card" aria-label="Missed call answered by AI demo">
+          <div class="phone-screen">
+            <div class="call-status">
+              <span><span class="pulse"></span> Live AI call</span>
+              <span>00:42</span>
+            </div>
+            <div class="caller">
+              <div class="avatar">VC</div>
+              <h2>VocalDesk Agent</h2>
+              <p>Answering after 3 missed rings</p>
+            </div>
+            <div class="transcript">
+              <div class="bubble ai">Hi, thanks for calling. The team is helping another customer, but I can help right now. What can I assist you with?</div>
+              <div class="bubble customer">I need to book an appointment for tomorrow afternoon.</div>
+              <div class="bubble ai">Absolutely. I found openings at 2:30 PM and 4:00 PM. Which works better for you?</div>
+            </div>
+            <div class="call-summary">
+              <strong>Instant team summary</strong>
+              New appointment request, tomorrow afternoon, caller prefers SMS confirmation. Priority: warm lead.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="container">
+        <div class="section-head">
+          <h2>A complete front desk voice agent for busy businesses.</h2>
+          <p>Designed for missed-call recovery, after-hours coverage, and overflow support when your real team is unavailable.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card">
+            <div class="card-icon">01</div>
+            <h3>Answers missed calls instantly</h3>
+            <p>Route unanswered calls to an AI receptionist that greets callers professionally and keeps the conversation moving.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon">02</div>
+            <h3>Qualifies and captures leads</h3>
+            <p>Collect names, phone numbers, service needs, budget, urgency, address, and preferred callback times.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon">03</div>
+            <h3>Books appointments</h3>
+            <p>Offer available time slots, confirm details, and prepare calendar-ready appointment notes for your team.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon">04</div>
+            <h3>Handles FAQs</h3>
+            <p>Answer common questions about hours, location, pricing, services, policies, and next steps using your business knowledge.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon">05</div>
+            <h3>Sends instant summaries</h3>
+            <p>Deliver call transcripts and action items to email, SMS, CRM, or your team dashboard after every conversation.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon">06</div>
+            <h3>Escalates urgent calls</h3>
+            <p>Detect emergencies, VIP callers, or high-intent prospects and notify the right person immediately.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow" class="workflow">
+      <div class="container">
+        <div class="section-head">
+          <h2>How the missed-call agent works.</h2>
+          <p>A simple call flow that protects revenue without changing how your business already receives phone calls.</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <h3>Call goes unanswered</h3>
+            <p>The phone rings your normal line first. If your team cannot answer, the call forwards to VocalDesk AI.</p>
+          </article>
+          <article class="step">
+            <h3>AI picks up naturally</h3>
+            <p>The agent introduces itself, understands the caller's request, and follows your approved script.</p>
+          </article>
+          <article class="step">
+            <h3>Details are captured</h3>
+            <p>Caller information, intent, preferred times, and urgency are structured into a clean lead record.</p>
+          </article>
+          <article class="step">
+            <h3>Your team gets notified</h3>
+            <p>Receive a summary, transcript, and next action so your staff can follow up quickly and confidently.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="industries">
+      <div class="container">
+        <div class="section-head">
+          <h2>Built for high-call-volume local businesses.</h2>
+          <p>Customize the agent's greeting, voice, language, FAQs, qualification questions, escalation rules, and booking logic.</p>
+        </div>
+        <ul class="industry-list">
+          <li>Home services</li>
+          <li>Medical clinics</li>
+          <li>Restaurants</li>
+          <li>Law firms</li>
+          <li>Real estate teams</li>
+          <li>Auto shops</li>
+          <li>Salons and spas</li>
+          <li>Sales offices</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="demo">
+      <div class="container demo-panel">
+        <div class="demo-box">
+          <p class="eyebrow" style="color: var(--blue);">Interactive sample</p>
+          <h2>Preview a missed-call response.</h2>
+          <p style="color: var(--muted); margin-top: 0.75rem;">Choose a caller intent to see how the AI agent can respond and summarize the call.</p>
+          <div class="quick-actions" aria-label="Call scenario buttons">
+            <button class="chip" type="button" data-scenario="booking">Book appointment</button>
+            <button class="chip" type="button" data-scenario="quote">Request quote</button>
+            <button class="chip" type="button" data-scenario="afterhours">After-hours FAQ</button>
+          </div>
+          <div id="demo-output" class="demo-output" aria-live="polite">
+AI: Thanks for calling. The team is unavailable, but I can help right now. Are you calling to book, get pricing, or ask a question?
+          </div>
+        </div>
+
+        <div id="contact" class="lead-form">
+          <p class="eyebrow" style="color: var(--blue);">Business setup</p>
+          <h2>Design your AI voice agent.</h2>
+          <p style="color: var(--muted); margin-top: 0.75rem;">Share the basics your agent should know. This static demo does not submit data yet, but it shows the professional intake flow.</p>
+          <form action="#" method="post">
+            <div class="form-grid">
+              <label>
+                Business name
+                <input type="text" name="business_name" placeholder="BrightStar Dental" required>
+              </label>
+              <label>
+                Industry
+                <select name="industry" required>
+                  <option value="">Choose industry</option>
+                  <option>Home services</option>
+                  <option>Clinic</option>
+                  <option>Restaurant</option>
+                  <option>Professional services</option>
+                  <option>Other</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-grid">
+              <label>
+                Main phone number
+                <input type="tel" name="phone" placeholder="(555) 123-4567" required>
+              </label>
+              <label>
+                Follow-up email
+                <input type="email" name="email" placeholder="owner@example.com" required>
+              </label>
+            </div>
+            <label>
+              What should the AI handle?
+              <textarea name="agent_goal" placeholder="Example: answer missed calls, book consultations, collect service address, answer pricing questions, and text the owner urgent leads."></textarea>
+            </label>
+            <button class="btn btn-primary" type="submit">Create My Voice-Agent Brief</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container">
+        <h2>Turn every missed call into a handled conversation.</h2>
+        <p>Give your business a reliable AI receptionist that sounds professional, captures every opportunity, and keeps your team focused.</p>
+        <a class="btn btn-secondary" href="#contact">Start My Setup</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 VocalDesk AI. Demo voice-agent landing page for missed-call automation.</p>
+  </footer>
+
+  <script>
+    const scenarios = {
+      booking: `AI: I can help book that. What service do you need and what day works best?
+Caller: Tomorrow afternoon for a consultation.
+AI: Great. I have the request noted for tomorrow afternoon. I will send the team your name, number, and preferred time so they can confirm.
+
+Summary: Appointment request, consultation, tomorrow afternoon, callback required.`,
+      quote: `AI: I can collect the details for a fast quote. What service are you looking for and where is the job located?
+Caller: I need a repair estimate near downtown.
+AI: Thanks. I captured the location, service type, and urgency. The team will follow up with pricing and availability.
+
+Summary: Quote request, repair estimate, downtown area, medium urgency.`,
+      afterhours: `AI: The office is currently closed, but I can still help. Our regular hours are Monday to Friday, 9 AM to 6 PM. Would you like a callback when the team opens?
+Caller: Yes, please call me in the morning.
+AI: Perfect. I will send your callback request to the team for the morning.
+
+Summary: After-hours caller, morning callback requested, FAQ answered.`
+    };
+
+    const output = document.getElementById("demo-output");
+
+    document.querySelectorAll("[data-scenario]").forEach((button) => {
+      button.addEventListener("click", () => {
+        output.textContent = scenarios[button.dataset.scenario];
+      });
+    });
+  </script>
+</body>
+</html>

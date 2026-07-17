@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: shawarma-queen-demo
+          path: ai-voice-agent
 
       - id: deployment
         uses: actions/deploy-pages@v4
