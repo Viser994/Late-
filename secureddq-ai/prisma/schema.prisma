@@ -1,0 +1,660 @@
+// SecureDDQ AI - Production Database Schema
+// PostgreSQL with pgvector extension for semantic search
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  OWNER
+  ADMIN
+  SECURITY_MANAGER
+  SECURITY_ANALYST
+  SALES_ENGINEER
+  VIEWER
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum DocumentType {
+  POLICY
+  SOC_REPORT
+  ISO_DOCUMENT
+  ARCHITECTURE
+  PENETRATION_TEST
+  SECURITY_POLICY
+  QUESTIONNAIRE
+  OTHER
+}
+
+enum QuestionnaireStatus {
+  DRAFT
+  IN_PROGRESS
+  PENDING_REVIEW
+  COMPLETED
+  ARCHIVED
+}
+
+enum QuestionType {
+  TEXT
+  LONG_TEXT
+  CHECKBOX
+  MULTIPLE_CHOICE
+  YES_NO
+  SECTION
+}
+
+enum AnswerStatus {
+  DRAFT
+  EDITED
+  APPROVED
+  REJECTED
+}
+
+enum AnswerStyle {
+  CONCISE
+  DETAILED
+  TECHNICAL
+  EXECUTIVE
+}
+
+enum ComplianceFramework {
+  SOC2
+  ISO27001
+  HIPAA
+  GDPR
+  PCI_DSS
+  NIST
+}
+
+enum ControlStatus {
+  COVERED
+  PARTIAL
+  MISSING
+  NOT_APPLICABLE
+}
+
+enum NotificationType {
+  QUESTIONNAIRE_NEW
+  REVIEW_REQUEST
+  DEADLINE
+  DOCUMENT_EXPIRATION
+  SUBSCRIPTION
+  MENTION
+  SYSTEM
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum JobType {
+  DOCUMENT_PROCESS
+  QUESTIONNAIRE_PARSE
+  GENERATE_ANSWERS
+  EMBEDDING_BATCH
+  EXPORT
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  EXPORT
+  LOGIN
+  INVITE
+}
+
+// ─── Organization & Users ────────────────────────────────────────────────────
+
+model Organization {
+  id               String             @id @default(cuid())
+  clerkOrgId       String?            @unique
+  name             String
+  slug             String             @unique
+  logoUrl          String?
+  website          String?
+  industry         String?
+  employeeCount    String?
+  description      String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  members          OrganizationMember[]
+  subscription     Subscription?
+  documents        Document[]
+  projects         Project[]
+  questionnaires   Questionnaire[]
+  complianceControls ComplianceControl[]
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+  auditLogs        AuditLog[]
+  apiKeys          ApiKey[]
+  settings         OrganizationSettings?
+  jobs             BackgroundJob[]
+  aiUsageLogs      AiUsageLog[]
+  chatSessions     ChatSession[]
+
+  @@index([slug])
+}
+
+model User {
+  id            String   @id @default(cuid())
+  clerkUserId   String   @unique
+  email         String   @unique
+  firstName     String?
+  lastName      String?
+  avatarUrl     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships   OrganizationMember[]
+  comments      Comment[]
+  auditLogs     AuditLog[]
+  activityLogs  ActivityLog[]
+  notifications Notification[]
+  chatSessions  ChatSession[]
+  answersEdited Answer[] @relation("AnswerEditor")
+
+  @@index([email])
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           UserRole @default(VIEWER)
+  invitedAt      DateTime @default(now())
+  joinedAt       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model OrganizationSettings {
+  id                    String   @id @default(cuid())
+  organizationId        String   @unique
+  defaultAnswerStyle    AnswerStyle @default(DETAILED)
+  requireApproval       Boolean  @default(true)
+  autoGenerateAnswers   Boolean  @default(true)
+  confidenceThreshold   Float    @default(0.7)
+  retentionDays         Int      @default(365)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// ─── Billing ─────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices     Invoice[]
+}
+
+model Invoice {
+  id              String   @id @default(cuid())
+  subscriptionId  String
+  stripeInvoiceId String?  @unique
+  amount          Int
+  currency        String   @default("usd")
+  status          String
+  pdfUrl          String?
+  periodStart     DateTime?
+  periodEnd       DateTime?
+  createdAt       DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+}
+
+// ─── Projects ────────────────────────────────────────────────────────────────
+
+model Project {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  customerName   String?
+  deadline       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  questionnaires Questionnaire[]
+
+  @@index([organizationId])
+}
+
+// ─── Documents & Knowledge Base ──────────────────────────────────────────────
+
+model Document {
+  id             String         @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  fileName       String
+  fileUrl        String
+  fileSize       Int
+  mimeType       String
+  documentType   DocumentType   @default(OTHER)
+  status         DocumentStatus @default(PENDING)
+  version        Int            @default(1)
+  tags           String[]       @default([])
+  expiresAt      DateTime?
+  archivedAt     DateTime?
+  processedAt    DateTime?
+  errorMessage   String?
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  versions     DocumentVersion[]
+  chunks       DocumentChunk[]
+  evidence     Evidence[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([documentType])
+}
+
+model DocumentVersion {
+  id         String   @id @default(cuid())
+  documentId String
+  version    Int
+  fileUrl    String
+  fileSize   Int
+  changeNote String?
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  documentId String
+  content    String
+  chunkIndex Int
+  tokenCount Int?
+  pageNumber Int?
+  section    String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  document  Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  embedding ChunkEmbedding?
+
+  @@index([documentId])
+}
+
+model ChunkEmbedding {
+  id        String                       @id @default(cuid())
+  chunkId   String                       @unique
+  embedding Unsupported("vector(1536)")?
+  model     String                       @default("text-embedding-3-small")
+  createdAt DateTime                     @default(now())
+
+  chunk DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+}
+
+// ─── Questionnaires ──────────────────────────────────────────────────────────
+
+model Questionnaire {
+  id             String              @id @default(cuid())
+  organizationId String
+  projectId      String?
+  title          String
+  description    String?
+  fileName       String?
+  fileUrl        String?
+  status         QuestionnaireStatus @default(DRAFT)
+  totalQuestions Int                 @default(0)
+  answeredCount  Int                 @default(0)
+  approvedCount  Int                 @default(0)
+  deadline       DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  questions    Question[]
+  sections     QuestionSection[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([projectId])
+}
+
+model QuestionSection {
+  id              String @id @default(cuid())
+  questionnaireId String
+  title           String
+  orderIndex      Int
+  createdAt       DateTime @default(now())
+
+  questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  questions     Question[]
+
+  @@index([questionnaireId])
+}
+
+model Question {
+  id              String       @id @default(cuid())
+  questionnaireId String
+  sectionId       String?
+  text            String
+  questionType    QuestionType @default(TEXT)
+  options         Json?
+  required        Boolean      @default(true)
+  orderIndex      Int
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  questionnaire Questionnaire  @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  section       QuestionSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  answers       Answer[]
+
+  @@index([questionnaireId])
+  @@index([sectionId])
+}
+
+model Answer {
+  id              String       @id @default(cuid())
+  questionId      String
+  content         String
+  status          AnswerStatus @default(DRAFT)
+  style           AnswerStyle  @default(DETAILED)
+  confidence      Float?
+  isUncertain     Boolean      @default(false)
+  version         Int          @default(1)
+  editedById      String?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  question  Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  editedBy  User?      @relation("AnswerEditor", fields: [editedById], references: [id], onDelete: SetNull)
+  evidence  Evidence[]
+  comments  Comment[]
+  versions  AnswerVersion[]
+
+  @@index([questionId])
+  @@index([status])
+}
+
+model AnswerVersion {
+  id         String       @id @default(cuid())
+  answerId   String
+  content    String
+  status     AnswerStatus
+  version    Int
+  createdAt  DateTime     @default(now())
+
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  @@index([answerId])
+}
+
+model Evidence {
+  id         String  @id @default(cuid())
+  answerId   String
+  documentId String
+  chunkId    String?
+  excerpt    String
+  pageNumber Int?
+  relevance  Float?
+
+  answer   Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([answerId])
+  @@index([documentId])
+}
+
+// ─── Compliance ──────────────────────────────────────────────────────────────
+
+model ComplianceControl {
+  id             String              @id @default(cuid())
+  organizationId String
+  framework      ComplianceFramework
+  controlId      String
+  title          String
+  description    String?
+  status         ControlStatus       @default(MISSING)
+  documentIds    String[]            @default([])
+  notes          String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, framework, controlId])
+  @@index([organizationId])
+  @@index([framework])
+}
+
+// ─── Comments & Collaboration ────────────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(cuid())
+  answerId  String
+  userId    String
+  content   String
+  mentions  String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([answerId])
+}
+
+// ─── AI Chat ─────────────────────────────────────────────────────────────────
+
+model ChatSession {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  title          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages     ChatMessage[]
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String
+  content   String
+  citations Json?
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+
+model Notification {
+  id             String           @id @default(cuid())
+  organizationId String
+  userId         String
+  type           NotificationType
+  title          String
+  message        String
+  link           String?
+  read           Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([organizationId])
+}
+
+// ─── Audit & Activity ────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String
+  userId         String?
+  action         AuditAction
+  entityType     String
+  entityId       String
+  metadata       Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  action         String
+  description    String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([createdAt])
+}
+
+// ─── API Keys ─────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  keyHash        String    @unique
+  keyPrefix      String
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+// ─── Background Jobs ─────────────────────────────────────────────────────────
+
+model BackgroundJob {
+  id             String    @id @default(cuid())
+  organizationId String
+  type           JobType
+  status         JobStatus @default(PENDING)
+  payload        Json
+  result         Json?
+  error          String?
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(3)
+  scheduledAt    DateTime  @default(now())
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledAt])
+  @@index([organizationId])
+}
+
+// ─── AI Usage Tracking ───────────────────────────────────────────────────────
+
+model AiUsageLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  operation      String
+  model          String
+  inputTokens    Int      @default(0)
+  outputTokens   Int      @default(0)
+  cost           Float?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([createdAt])
+}
