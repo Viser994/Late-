@@ -1,0 +1,464 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  SECURITY_MANAGER
+  SECURITY_ANALYST
+  SALES_ENGINEER
+  VIEWER
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  EXPIRED
+  ARCHIVED
+  FAILED
+}
+
+enum QuestionnaireStatus {
+  DRAFT
+  PROCESSING
+  IN_REVIEW
+  APPROVED
+  EXPORTED
+  ARCHIVED
+}
+
+enum AnswerStatus {
+  DRAFT
+  EDITED
+  APPROVED
+  REJECTED
+}
+
+enum ComplianceFramework {
+  SOC2
+  ISO27001
+  HIPAA
+  GDPR
+  PCI_DSS
+  NIST
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+model User {
+  id             String   @id @default(cuid())
+  clerkId        String   @unique
+  email          String   @unique
+  name           String?
+  imageUrl       String?
+  mfaEnabled     Boolean  @default(false)
+  emailVerified  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  memberships    Membership[]
+  comments       Comment[]
+  answerVersions AnswerVersion[]
+  auditLogs      AuditLog[]
+  activities     ActivityLog[]
+  apiKeys        ApiKey[]
+  notifications  Notification[]
+}
+
+model Organization {
+  id                  String   @id @default(cuid())
+  clerkOrganizationId String?  @unique
+  name                String
+  slug                String   @unique
+  website             String?
+  industry            String?
+  description         String?
+  securityContact     String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  memberships     Membership[]
+  invitations     Invitation[]
+  subscription    Subscription?
+  documents       Document[]
+  projects        Project[]
+  questionnaires  Questionnaire[]
+  aiUsage         AiUsage[]
+  complianceMaps  ComplianceMapping[]
+  comments        Comment[]
+  auditLogs       AuditLog[]
+  activities      ActivityLog[]
+  apiKeys         ApiKey[]
+  notifications   Notification[]
+  settings        OrganizationSetting[]
+}
+
+model Membership {
+  id             String           @id @default(cuid())
+  userId         String
+  organizationId String
+  role           OrganizationRole
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+}
+
+model Invitation {
+  id             String           @id @default(cuid())
+  email          String
+  role           OrganizationRole
+  token          String           @unique
+  acceptedAt     DateTime?
+  expiresAt      DateTime
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, email])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices     Invoice[]
+}
+
+model Invoice {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  stripeInvoiceId String  @unique
+  amountDue      Int
+  currency       String   @default("usd")
+  hostedUrl      String?
+  pdfUrl         String?
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  customerName   String?
+  deadline       DateTime?
+  valueProtected Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  questionnaires Questionnaire[]
+}
+
+model Questionnaire {
+  id             String              @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String
+  sourceType     String
+  status         QuestionnaireStatus @default(DRAFT)
+  deadline       DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  questions    Question[]
+}
+
+model Question {
+  id                String   @id @default(cuid())
+  questionnaireId   String
+  section           String?
+  prompt            String
+  fieldType         String   @default("long_text")
+  choices           Json?
+  required          Boolean  @default(false)
+  sourceCoordinates Json?
+  order             Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  answers       Answer[]
+}
+
+model Answer {
+  id              String       @id @default(cuid())
+  questionId      String
+  body            String
+  status          AnswerStatus @default(DRAFT)
+  confidence      Float        @default(0)
+  style           String       @default("concise")
+  uncertaintyNote String?
+  approvedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  evidence Evidence[]
+  versions AnswerVersion[]
+  comments Comment[]
+}
+
+model AnswerVersion {
+  id        String   @id @default(cuid())
+  answerId  String
+  editorId  String?
+  body      String
+  status    AnswerStatus
+  createdAt DateTime @default(now())
+
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  editor User?  @relation(fields: [editorId], references: [id], onDelete: SetNull)
+}
+
+model Document {
+  id             String         @id @default(cuid())
+  organizationId String
+  title          String
+  description    String?
+  mimeType       String
+  storageKey     String
+  checksum       String?
+  version        Int            @default(1)
+  status         DocumentStatus @default(UPLOADED)
+  tags           String[]       @default([])
+  expiresAt      DateTime?
+  archivedAt     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks       DocumentChunk[]
+  versions     DocumentVersion[]
+  mappings     ComplianceMapping[]
+
+  @@index([organizationId, status])
+}
+
+model DocumentVersion {
+  id         String   @id @default(cuid())
+  documentId String
+  version    Int
+  storageKey String
+  checksum   String?
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+}
+
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  documentId String
+  content    String
+  page       Int?
+  section    String?
+  tokenCount Int
+  metadata   Json?
+  embedding  Unsupported("vector")?
+  createdAt  DateTime @default(now())
+
+  document Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  evidence Evidence[]
+
+  @@index([documentId])
+}
+
+model Evidence {
+  id        String   @id @default(cuid())
+  answerId  String
+  chunkId   String
+  quote     String
+  relevance Float
+  createdAt DateTime @default(now())
+
+  answer Answer        @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  chunk  DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@unique([answerId, chunkId])
+}
+
+model ComplianceControl {
+  id          String              @id @default(cuid())
+  framework   ComplianceFramework
+  controlId   String
+  title       String
+  description String
+
+  mappings ComplianceMapping[]
+
+  @@unique([framework, controlId])
+}
+
+model ComplianceMapping {
+  id             String   @id @default(cuid())
+  organizationId String
+  controlId      String
+  documentId     String?
+  status         String   @default("missing")
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  control      ComplianceControl @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  document     Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, controlId])
+}
+
+model AiUsage {
+  id             String   @id @default(cuid())
+  organizationId String
+  feature        String
+  model          String
+  inputTokens    Int
+  outputTokens   Int
+  costCents      Int
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model Comment {
+  id             String   @id @default(cuid())
+  organizationId String
+  answerId       String?
+  authorId       String
+  body           String
+  mentions       String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  answer       Answer?      @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  actorId        String?
+  action         String
+  entityType     String
+  entityId       String?
+  ipAddress      String?
+  userAgent      String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+}
+
+model ActivityLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorId        String?
+  summary        String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+}
+
+model Notification {
+  id             String              @id @default(cuid())
+  organizationId String
+  userId         String?
+  channel        NotificationChannel
+  status         NotificationStatus  @default(UNREAD)
+  title          String
+  body           String
+  metadata       Json?
+  createdAt      DateTime            @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+  id             String   @id @default(cuid())
+  organizationId String
+  ownerId        String?
+  name           String
+  prefix         String
+  hashedKey      String
+  scopes         String[] @default([])
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner        User?        @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, prefix])
+}
+
+model OrganizationSetting {
+  id             String   @id @default(cuid())
+  organizationId String
+  key            String
+  value          Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+}

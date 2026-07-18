@@ -1,0 +1,47 @@
+{
+  "name": "secureddq-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.5.20",
+    "@prisma/client": "^7.8.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "inngest": "^4.13.0",
+    "lucide-react": "^1.25.0",
+    "next": "^16.2.10",
+    "openai": "^6.48.0",
+    "prisma": "^7.8.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sonner": "^2.0.7",
+    "stripe": "^22.3.2",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.3",
+    "uploadthing": "^7.7.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^10.7.0",
+    "eslint-config-next": "^16.2.10",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
