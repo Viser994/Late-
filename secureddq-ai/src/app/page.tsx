@@ -151,15 +151,15 @@ export default function LandingPage() {
               security assessments, DDQs, and RFPs.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" asChild>
-                <Link href="/sign-up">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="#how-it-works">See How It Works</Link>
-              </Button>
+            <Button size="lg" asChild>
+              <Link href="/demo">
+                Try Live Demo
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="#how-it-works">See How It Works</Link>
+            </Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
               No credit card required · Free plan available
