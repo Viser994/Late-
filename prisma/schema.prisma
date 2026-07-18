@@ -1,0 +1,655 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pgvector(map: "vector")]
+}
+
+// =====================
+// ENUMS
+// =====================
+
+enum UserRole {
+  OWNER
+  ADMIN
+  SECURITY_MANAGER
+  SECURITY_ANALYST
+  SALES_ENGINEER
+  VIEWER
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  INCOMPLETE
+}
+
+enum DocumentStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum DocumentType {
+  PDF
+  DOCX
+  XLSX
+  CSV
+  TXT
+  MARKDOWN
+  OTHER
+}
+
+enum QuestionnaireStatus {
+  DRAFT
+  PROCESSING
+  IN_PROGRESS
+  REVIEW
+  COMPLETED
+  ARCHIVED
+}
+
+enum AnswerStatus {
+  DRAFT
+  AI_GENERATED
+  EDITED
+  APPROVED
+  REJECTED
+  PENDING_REVIEW
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ComplianceFramework {
+  SOC2
+  ISO27001
+  HIPAA
+  GDPR
+  PCI_DSS
+  NIST
+  FedRAMP
+  CCPA
+  SOX
+}
+
+enum NotificationType {
+  NEW_QUESTIONNAIRE
+  REVIEW_REQUESTED
+  ANSWER_APPROVED
+  ANSWER_REJECTED
+  DOCUMENT_PROCESSED
+  DOCUMENT_EXPIRING
+  SUBSCRIPTION_ISSUE
+  TEAM_INVITATION
+  DEADLINE_REMINDER
+  SYSTEM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+  UPLOAD
+  DOWNLOAD
+  EXPORT
+  LOGIN
+  LOGOUT
+  INVITE
+  APPROVE
+  REJECT
+}
+
+// =====================
+// CORE MODELS
+// =====================
+
+model Organization {
+  id          String   @id @default(cuid())
+  clerkOrgId  String?  @unique
+  name        String
+  slug        String   @unique
+  domain      String?
+  logoUrl     String?
+  website     String?
+  industry    String?
+  size        String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members       OrganizationMember[]
+  invitations   Invitation[]
+  subscription  Subscription?
+  documents     Document[]
+  projects      Project[]
+  questionnaires Questionnaire[]
+  apiKeys       ApiKey[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+  settings      OrganizationSettings?
+  complianceControls ComplianceControl[]
+  activityLogs  ActivityLog[]
+
+  @@index([slug])
+}
+
+model User {
+  id         String   @id @default(cuid())
+  clerkId    String   @unique
+  email      String   @unique
+  firstName  String?
+  lastName   String?
+  avatarUrl  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  memberships   OrganizationMember[]
+  invitedBy     Invitation[]         @relation("InvitedBy")
+  invitations   Invitation[]         @relation("InvitedUser")
+  answers       Answer[]
+  comments      Comment[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  activityLogs  ActivityLog[]
+  sessions      UserSession[]
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           UserRole @default(VIEWER)
+  joinedAt       DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model Invitation {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  role           UserRole  @default(VIEWER)
+  token          String    @unique @default(cuid())
+  invitedById    String
+  invitedUserId  String?
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitedBy", fields: [invitedById], references: [id])
+  invitedUser  User?        @relation("InvitedUser", fields: [invitedUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([token])
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  clerkSessionId String @unique
+  ipAddress String?
+  userAgent String?
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// =====================
+// SUBSCRIPTION & BILLING
+// =====================
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices     Invoice[]
+  usageRecords UsageRecord[]
+
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+model Invoice {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  stripeInvoiceId String? @unique
+  amount         Int
+  currency       String   @default("usd")
+  status         String
+  paidAt         DateTime?
+  invoiceUrl     String?
+  pdfUrl         String?
+  createdAt      DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+}
+
+model UsageRecord {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  metric         String
+  value          Int
+  recordedAt     DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([metric])
+}
+
+// =====================
+// DOCUMENTS & KNOWLEDGE BASE
+// =====================
+
+model Document {
+  id             String         @id @default(cuid())
+  organizationId String
+  name           String
+  originalName   String
+  fileUrl        String
+  fileKey        String         @unique
+  fileSize       Int
+  mimeType       String
+  type           DocumentType
+  status         DocumentStatus @default(UPLOADING)
+  description    String?
+  tags           String[]
+  version        Int            @default(1)
+  isArchived     Boolean        @default(false)
+  expiresAt      DateTime?
+  processedAt    DateTime?
+  errorMessage   String?
+  pageCount      Int?
+  wordCount      Int?
+  checksum       String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks       DocumentChunk[]
+  evidence     Evidence[]
+  complianceMappings ComplianceMapping[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([tags])
+}
+
+model DocumentChunk {
+  id         String                  @id @default(cuid())
+  documentId String
+  content    String
+  chunkIndex Int
+  tokenCount Int?
+  metadata   Json?
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                @default(now())
+
+  document Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  evidence Evidence[]
+
+  @@index([documentId])
+}
+
+// =====================
+// PROJECTS
+// =====================
+
+model Project {
+  id             String        @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  status         ProjectStatus @default(ACTIVE)
+  dueDate        DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  questionnaires Questionnaire[]
+
+  @@index([organizationId])
+}
+
+// =====================
+// QUESTIONNAIRES
+// =====================
+
+model Questionnaire {
+  id             String              @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String
+  description    String?
+  companyName    String?
+  fileUrl        String?
+  fileKey        String?
+  status         QuestionnaireStatus @default(DRAFT)
+  totalQuestions Int                 @default(0)
+  answeredCount  Int                 @default(0)
+  approvedCount  Int                 @default(0)
+  dueDate        DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id])
+  sections     Section[]
+  questions    Question[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model Section {
+  id              String   @id @default(cuid())
+  questionnaireId String
+  name            String
+  description     String?
+  orderIndex      Int
+  createdAt       DateTime @default(now())
+
+  questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  questions     Question[]
+
+  @@index([questionnaireId])
+}
+
+model Question {
+  id              String   @id @default(cuid())
+  questionnaireId String
+  sectionId       String?
+  text            String
+  description     String?
+  questionType    String   @default("text")
+  options         Json?
+  isRequired      Boolean  @default(true)
+  orderIndex      Int
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  section       Section?      @relation(fields: [sectionId], references: [id])
+  answers       Answer[]
+  evidence      Evidence[]
+
+  @@index([questionnaireId])
+  @@index([sectionId])
+}
+
+model Answer {
+  id              String       @id @default(cuid())
+  questionId      String
+  authorId        String?
+  content         String
+  status          AnswerStatus @default(DRAFT)
+  confidenceScore Float?
+  aiModel         String?
+  isAiGenerated   Boolean      @default(false)
+  editedContent   String?
+  reviewedAt      DateTime?
+  reviewedById    String?
+  approvedAt      DateTime?
+  approvedById    String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  question  Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author    User?      @relation(fields: [authorId], references: [id])
+  evidence  Evidence[]
+  comments  Comment[]
+  versions  AnswerVersion[]
+
+  @@index([questionId])
+  @@index([status])
+}
+
+model AnswerVersion {
+  id        String   @id @default(cuid())
+  answerId  String
+  content   String
+  version   Int
+  createdAt DateTime @default(now())
+
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  @@index([answerId])
+}
+
+model Evidence {
+  id            String   @id @default(cuid())
+  questionId    String?
+  answerId      String?
+  documentId    String
+  chunkId       String?
+  relevanceScore Float?
+  excerpt       String?
+  createdAt     DateTime @default(now())
+
+  question  Question?      @relation(fields: [questionId], references: [id])
+  answer    Answer?        @relation(fields: [answerId], references: [id])
+  document  Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunk     DocumentChunk? @relation(fields: [chunkId], references: [id])
+
+  @@index([questionId])
+  @@index([answerId])
+  @@index([documentId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  answerId  String
+  authorId  String
+  content   String
+  mentions  String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  answer Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([answerId])
+  @@index([authorId])
+}
+
+// =====================
+// COMPLIANCE
+// =====================
+
+model ComplianceControl {
+  id             String              @id @default(cuid())
+  organizationId String
+  framework      ComplianceFramework
+  controlId      String
+  name           String
+  description    String?
+  category       String?
+  isCovered      Boolean             @default(false)
+  coverageScore  Float?
+  notes          String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  mappings     ComplianceMapping[]
+
+  @@unique([organizationId, framework, controlId])
+  @@index([organizationId])
+  @@index([framework])
+}
+
+model ComplianceMapping {
+  id          String   @id @default(cuid())
+  controlId   String
+  documentId  String
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  control  ComplianceControl @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  document Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([controlId, documentId])
+  @@index([controlId])
+  @@index([documentId])
+}
+
+// =====================
+// API KEYS
+// =====================
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  keyHash        String    @unique
+  keyPrefix      String
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([keyHash])
+}
+
+// =====================
+// AUDIT & NOTIFICATIONS
+// =====================
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String
+  userId         String?
+  action         AuditAction
+  resourceType   String
+  resourceId     String?
+  details        Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  action         String
+  description    String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  organizationId String
+  userId         String
+  type           NotificationType
+  title          String
+  message        String
+  resourceType   String?
+  resourceId     String?
+  isRead         Boolean          @default(false)
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([isRead])
+}
+
+// =====================
+// SETTINGS
+// =====================
+
+model OrganizationSettings {
+  id                    String   @id @default(cuid())
+  organizationId        String   @unique
+  defaultAnswerStyle    String   @default("professional")
+  requireApproval       Boolean  @default(true)
+  allowAiGeneration     Boolean  @default(true)
+  confidenceThreshold   Float    @default(0.7)
+  notifyOnNewQuestionnaire Boolean @default(true)
+  notifyOnDocumentExpiry  Boolean @default(true)
+  emailDomain           String?
+  ssoEnabled            Boolean  @default(false)
+  ssoProvider           String?
+  customBranding        Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
