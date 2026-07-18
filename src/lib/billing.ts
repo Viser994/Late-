@@ -1,5 +1,11 @@
 import { SubscriptionPlan } from "@prisma/client";
 
+type BillingFeature =
+  | "api"
+  | "advanced_exports"
+  | "approval_workflows"
+  | "sso";
+
 export const planLimits = {
   FREE: {
     users: 2,
@@ -29,14 +35,14 @@ export const planLimits = {
 
 export function canUseFeature(
   plan: SubscriptionPlan,
-  feature: "api" | "advanced_exports" | "approval_workflows" | "sso"
+  feature: BillingFeature
 ) {
-  const allowed = {
+  const allowed: Record<BillingFeature, SubscriptionPlan[]> = {
     api: ["PROFESSIONAL", "ENTERPRISE"],
     advanced_exports: ["PROFESSIONAL", "ENTERPRISE"],
     approval_workflows: ["PROFESSIONAL", "ENTERPRISE"],
     sso: ["ENTERPRISE"]
-  } satisfies Record<typeof feature, SubscriptionPlan[]>;
+  };
 
   return allowed[feature].includes(plan);
 }

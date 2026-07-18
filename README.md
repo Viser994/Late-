@@ -9,7 +9,7 @@ SecureDDQ AI is an enterprise SaaS foundation for automating cybersecurity DDQs,
 - Prisma ORM, PostgreSQL, pgvector
 - Clerk authentication and organization security
 - Stripe Billing
-- UploadThing upload routing
+- AWS S3 signed upload routing
 - OpenAI RAG answer generation
 - Inngest background document processing
 - Vitest unit tests
@@ -52,7 +52,7 @@ See `.env.example` for all configuration. Production deployments should provide:
 - Clerk keys and webhook secret
 - OpenAI API key and model names
 - Stripe API key, webhook secret, and price IDs
-- UploadThing or S3 credentials
+- S3 credentials
 - Inngest keys
 - Encryption and security scanning keys
 

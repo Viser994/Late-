@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { chunkText, extractTextFromUpload } from "@/lib/documents";
@@ -43,7 +44,7 @@ export async function createDocumentFromUpload(formData: FormData) {
         create: chunks.map((chunk) => ({
           content: chunk.content,
           tokenCount: chunk.tokenCount,
-          metadata: chunk.metadata
+          metadata: chunk.metadata as Prisma.InputJsonValue | undefined
         }))
       }
     }

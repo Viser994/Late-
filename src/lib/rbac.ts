@@ -13,7 +13,7 @@ export type Permission =
   | "admin.read"
   | "api_keys.manage";
 
-const rolePermissions = {
+const rolePermissions: Record<OrganizationRole, Permission[]> = {
   OWNER: [
     "organization.manage",
     "users.invite",
@@ -61,7 +61,7 @@ const rolePermissions = {
     "analytics.read"
   ],
   VIEWER: ["documents.read", "questionnaires.read", "analytics.read"]
-} satisfies Record<OrganizationRole, Permission[]>;
+};
 
 export function can(role: OrganizationRole, permission: Permission) {
   return rolePermissions[role].includes(permission);

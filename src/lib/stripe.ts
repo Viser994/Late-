@@ -4,7 +4,6 @@ import { requireEnv } from "@/lib/env";
 
 export function getStripeClient() {
   return new Stripe(requireEnv("STRIPE_SECRET_KEY"), {
-    apiVersion: "2025-06-30.basil",
     typescript: true
   });
 }

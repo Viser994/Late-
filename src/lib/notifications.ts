@@ -1,4 +1,4 @@
-import { NotificationChannel } from "@prisma/client";
+import { NotificationChannel, Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
@@ -19,7 +19,7 @@ export async function notifyUser(input: {
       channel,
       title: input.title,
       body: input.body,
-      metadata: input.metadata
+      metadata: input.metadata as Prisma.InputJsonValue | undefined
     }))
   });
 }

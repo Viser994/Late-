@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { inngest } from "@/jobs/inngest";
 
 export const processDocument = inngest.createFunction(
-  { id: "process-document" },
-  { event: "document/uploaded" },
+  { id: "process-document", triggers: { event: "document/uploaded" } },
   async ({ event, step }) => {
     const documentId = event.data.documentId as string;
 

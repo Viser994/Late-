@@ -29,9 +29,12 @@ export default function LandingPage() {
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
         </nav>
-        <Button asChild={false} variant="outline">
-          <Link href="/dashboard">Open app</Link>
-        </Button>
+        <Link
+          href="/dashboard"
+          className="inline-flex h-11 items-center justify-center rounded-xl border border-border px-5 text-sm font-semibold transition hover:bg-muted"
+        >
+          Open app
+        </Link>
       </header>
 
       <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -158,8 +161,8 @@ export default function LandingPage() {
                 <CardContent className="p-6">
                   <Gauge className="h-5 w-5 text-primary" />
                   <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                    "{quote}. SecureDDQ cut our security response cycle from
-                    weeks of manual work to a single afternoon."
+                    &ldquo;{quote}. SecureDDQ cut our security response cycle from
+                    weeks of manual work to a single afternoon.&rdquo;
                   </p>
                   <p className="mt-4 text-sm font-semibold">Placeholder CISO</p>
                 </CardContent>
