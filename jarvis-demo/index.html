@@ -751,6 +751,7 @@
           <div class="settings-group">
             <label>Gemini API Key (Gemini 2.0 Flash — full AI)</label>
             <input type="password" id="geminiApiKey" placeholder="AIza..." autocomplete="off">
+            <p class="settings-note" id="geminiStatus">Paste your key from Google AI Studio, then click outside the box.</p>
           </div>
           <div class="settings-group">
             <label>OpenAI API Key (optional alternative)</label>
@@ -838,6 +839,7 @@
     const textInput = $('textInput');
     const sendBtn = $('sendBtn');
     const geminiApiKeyInput = $('geminiApiKey');
+    const geminiStatus = $('geminiStatus');
     const openaiApiKeyInput = $('openaiApiKey');
     const voiceSelect = $('voiceSelect');
     const toggleAutoListen = $('toggleAutoListen');
@@ -1230,27 +1232,63 @@
 
     // ─── AI Brain ────────────────────────────────────────────
     const WIKI_API = 'https://en.wikipedia.org/w/api.php';
-    const GEMINI_MODEL = 'gemini-2.0-flash';
+    const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash'];
     const JARVIS_PROMPT = `You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), Tony Stark's AI assistant from Iron Man. You are sophisticated, witty, and speak with a refined British tone. Keep responses concise (1-3 sentences) since they will be spoken aloud. You are helpful, occasionally dry-humored, and refer to the user as "sir" or "ma'am" unless told otherwise.`;
 
-    function updateAiModeLabel() {
-      if (state.geminiApiKey) sysAiMode.textContent = 'GEMINI';
-      else if (state.openaiApiKey) sysAiMode.textContent = 'OPENAI';
-      else sysAiMode.textContent = 'KNOWLEDGE';
+    function saveGeminiKey() {
+      state.geminiApiKey = geminiApiKeyInput.value.trim();
+      localStorage.setItem('jarvis_gemini_api_key', state.geminiApiKey);
+      updateAiModeLabel();
+      if (state.geminiApiKey) testGeminiConnection();
+    }
+
+    function formatGeminiError(err) {
+      const m = String(err?.message || err || '');
+      if (/API key not valid|API_KEY_INVALID/i.test(m)) {
+        return "Sir, that Gemini API key doesn't look valid. Copy a fresh key from aistudio.google.com/apikey and paste it in settings — no extra spaces.";
+      }
+      if (/referrer|HTTP_REFERRER|blocked/i.test(m)) {
+        return "Your API key is blocking this website. In Google AI Studio, edit the key restrictions and add https://viser994.github.io/* as an allowed website, or set it to unrestricted for testing.";
+      }
+      if (/quota|RESOURCE_EXHAUSTED|rate limit/i.test(m)) {
+        return "Gemini quota exceeded, sir. Wait a minute and try again, or check usage in Google AI Studio.";
+      }
+      if (/Failed to fetch|NetworkError|network/i.test(m)) {
+        return "Couldn't reach Gemini — check your internet connection and try again.";
+      }
+      return `Gemini error: ${m}`;
     }
 
     function buildGeminiContents(history) {
-      return history.slice(-10).map((msg) => ({
+      const turns = history.slice(-10).map((msg) => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }],
+        text: msg.content,
       }));
+
+      const merged = [];
+      for (const turn of turns) {
+        const last = merged[merged.length - 1];
+        if (last && last.role === turn.role) {
+          last.text += '\n\n' + turn.text;
+        } else {
+          merged.push({ role: turn.role, text: turn.text });
+        }
+      }
+
+      if (merged.length && merged[0].role === 'model') merged.shift();
+      if (!merged.length) merged.push({ role: 'user', text: 'Hello' });
+
+      return merged.map((t) => ({ role: t.role, parts: [{ text: t.text }] }));
     }
 
-    async function getGeminiResponse(userMessage) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(state.geminiApiKey)}`;
+    async function callGemini(model) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': state.geminiApiKey,
+        },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: JARVIS_PROMPT }] },
           contents: buildGeminiContents(state.history),
@@ -1261,18 +1299,71 @@
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `Gemini API error ${res.status}`);
+        throw new Error(data?.error?.message || `Gemini API error ${res.status}`);
       }
 
-      const data = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!reply) throw new Error('Empty response from Gemini');
+      const candidate = data?.candidates?.[0];
+      const reply = candidate?.content?.parts?.[0]?.text;
+      if (!reply) {
+        const reason = candidate?.finishReason || 'unknown';
+        throw new Error(`No response from Gemini (${reason})`);
+      }
       return reply.trim();
     }
 
-    async function getOpenAIResponse() {
+    async function getGeminiResponse() {
+      let lastError;
+      for (const model of GEMINI_MODELS) {
+        try {
+          return await callGemini(model);
+        } catch (err) {
+          lastError = err;
+          if (/not found|not supported|404/i.test(err.message)) continue;
+          throw err;
+        }
+      }
+      throw lastError || new Error('No Gemini models available');
+    }
+
+    async function testGeminiConnection() {
+      if (!state.geminiApiKey) {
+        geminiStatus.textContent = 'Paste your key from Google AI Studio.';
+        geminiStatus.style.color = 'var(--text-dim)';
+        return;
+      }
+
+      geminiStatus.textContent = 'Testing connection...';
+      geminiStatus.style.color = 'var(--gold)';
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODELS[0]}:generateContent`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': state.geminiApiKey,
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Reply with exactly: online' }] }],
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error?.message || `Error ${res.status}`);
+        geminiStatus.textContent = 'Gemini connected — full AI active.';
+        geminiStatus.style.color = 'var(--green)';
+      } catch (err) {
+        geminiStatus.textContent = formatGeminiError(err);
+        geminiStatus.style.color = 'var(--red)';
+      }
+    }
+      if (state.geminiApiKey) sysAiMode.textContent = 'GEMINI';
+      else if (state.openaiApiKey) sysAiMode.textContent = 'OPENAI';
+      else sysAiMode.textContent = 'KNOWLEDGE';
+    }
+
+    function updateAiModeLabel() {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -1384,7 +1475,7 @@
       const lower = msg.toLowerCase();
 
       if (apiFailed) {
-        return "My connection to the premium neural network was interrupted, sir. Continuing with my built-in knowledge base.";
+        return null;
       }
 
       const responses = {
@@ -1423,7 +1514,7 @@
           "The suit is impressive, but it's the mind inside that truly matters, sir.",
         ],
         help: [
-          "Ask me anything, sir. I can define words, look up facts from Wikipedia, solve maths, tell jokes, give the time and date, and answer general knowledge questions — all without an API key.",
+          "Ask me anything, sir. With a Gemini API key I can hold full conversations on any topic. Without a key, I use dictionaries and Wikipedia for facts, maths, and general knowledge.",
           "Try: 'define serendipity', 'who is Albert Einstein', 'what is photosynthesis', or '25 times 4'. An optional OpenAI key in settings unlocks even deeper conversation.",
         ],
       };
@@ -1495,14 +1586,20 @@
 
       if (state.geminiApiKey) {
         try {
-          const reply = await getGeminiResponse(userMessage);
+          const reply = await getGeminiResponse();
           state.history.push({ role: 'assistant', content: reply });
           return reply;
         } catch (err) {
           console.error('Gemini error:', err);
-          const reply = await getFreeKnowledgeResponse(userMessage, true);
-          state.history.push({ role: 'assistant', content: reply });
-          return reply;
+          const errMsg = formatGeminiError(err);
+          if (/API key|referrer|blocked|quota|RESOURCE_EXHAUSTED/i.test(errMsg)) {
+            state.history.push({ role: 'assistant', content: errMsg });
+            return errMsg;
+          }
+          const reply = await getFreeKnowledgeResponse(userMessage, false);
+          const combined = `${errMsg} Here's what I found locally: ${reply}`;
+          state.history.push({ role: 'assistant', content: combined });
+          return combined;
         }
       }
 
@@ -1598,11 +1695,9 @@
     geminiApiKeyInput.value = state.geminiApiKey;
     openaiApiKeyInput.value = state.openaiApiKey;
 
-    geminiApiKeyInput.addEventListener('change', () => {
-      state.geminiApiKey = geminiApiKeyInput.value.trim();
-      localStorage.setItem('jarvis_gemini_api_key', state.geminiApiKey);
-      updateAiModeLabel();
-    });
+    geminiApiKeyInput.addEventListener('input', saveGeminiKey);
+    geminiApiKeyInput.addEventListener('change', saveGeminiKey);
+    geminiApiKeyInput.addEventListener('blur', saveGeminiKey);
 
     openaiApiKeyInput.addEventListener('change', () => {
       state.openaiApiKey = openaiApiKeyInput.value.trim();
@@ -1611,6 +1706,7 @@
     });
 
     updateAiModeLabel();
+    if (state.geminiApiKey) testGeminiConnection();
 
     toggleSpeak.addEventListener('click', () => {
       state.speakResponses = !state.speakResponses;
