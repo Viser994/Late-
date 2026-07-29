@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S. — Just A Rather Very Intelligent System</title>
+  <meta name="description" content="Talk to JARVIS — your AI assistant inspired by Iron Man. Voice-powered conversation with a holographic HUD interface.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan: #00d4ff;
+      --cyan-dim: #0099bb;
+      --cyan-glow: rgba(0, 212, 255, 0.4);
+      --blue-dark: #0a1628;
+      --blue-mid: #0d2137;
+      --blue-panel: rgba(13, 33, 55, 0.85);
+      --gold: #f0c040;
+      --red: #ff3355;
+      --green: #00ff88;
+      --text: #c8e6f5;
+      --text-dim: #6a9ab8;
+      --border: rgba(0, 212, 255, 0.25);
+      --font-hud: "Orbitron", monospace;
+      --font-body: "Rajdhani", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--blue-dark);
+      color: var(--text);
+      position: relative;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scanline {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Layout */
+    .hud {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    /* Header */
+    .hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--blue-panel);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      font-family: var(--font-hud);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      color: var(--cyan);
+      text-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .logo span {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      font-family: var(--font-hud);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .status-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); }
+    .status-dot.listening { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); animation: pulse-fast 0.6s ease-in-out infinite; }
+    .status-dot.speaking { background: var(--gold); box-shadow: 0 0 12px var(--gold); animation: pulse-fast 0.8s ease-in-out infinite; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes pulse-fast {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+    }
+
+    .clock {
+      font-family: var(--font-hud);
+      font-size: 0.85rem;
+      color: var(--cyan);
+      letter-spacing: 0.15em;
+    }
+
+    /* Main area */
+    .hud-main {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1rem;
+      min-height: 0;
+    }
+
+    @media (max-width: 900px) {
+      .hud-main { grid-template-columns: 1fr; }
+      .side-panel { display: none; }
+    }
+
+    /* Center orb */
+    .center-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 0;
+    }
+
+    .orb-container {
+      position: relative;
+      width: min(340px, 70vw);
+      height: min(340px, 70vw);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .orb-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+
+    .orb-ring-1 {
+      width: 100%;
+      height: 100%;
+      animation: spin 20s linear infinite;
+      border-style: dashed;
+    }
+
+    .orb-ring-2 {
+      width: 85%;
+      height: 85%;
+      animation: spin-reverse 15s linear infinite;
+      border-color: rgba(0, 212, 255, 0.15);
+    }
+
+    .orb-ring-3 {
+      width: 70%;
+      height: 70%;
+      animation: spin 10s linear infinite;
+      border-color: rgba(0, 212, 255, 0.1);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin-reverse { to { transform: rotate(-360deg); } }
+
+    .orb-core {
+      width: 55%;
+      height: 55%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #1a4a6e 0%, #0a1628 60%, #050d18 100%);
+      border: 2px solid var(--cyan);
+      box-shadow:
+        0 0 40px var(--cyan-glow),
+        inset 0 0 30px rgba(0, 212, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: box-shadow 0.3s, transform 0.2s;
+      position: relative;
+      z-index: 5;
+    }
+
+    .orb-core:hover {
+      box-shadow: 0 0 60px var(--cyan-glow), inset 0 0 40px rgba(0, 212, 255, 0.15);
+      transform: scale(1.02);
+    }
+
+    .orb-core.active {
+      box-shadow: 0 0 80px var(--cyan-glow), 0 0 120px rgba(0, 212, 255, 0.2), inset 0 0 50px rgba(0, 212, 255, 0.2);
+      animation: orb-pulse 1.5s ease-in-out infinite;
+    }
+
+    .orb-core.speaking {
+      border-color: var(--gold);
+      box-shadow: 0 0 60px rgba(240, 192, 64, 0.4), inset 0 0 40px rgba(240, 192, 64, 0.1);
+      animation: orb-pulse-gold 0.8s ease-in-out infinite;
+    }
+
+    @keyframes orb-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    @keyframes orb-pulse-gold {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(240, 192, 64, 0.4); }
+      50% { transform: scale(1.06); box-shadow: 0 0 90px rgba(240, 192, 64, 0.6); }
+    }
+
+    #visualizer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .orb-label {
+      font-family: var(--font-hud);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      text-align: center;
+      margin-top: 1.5rem;
+      opacity: 0.8;
+    }
+
+    .orb-hint {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    /* Transcript */
+    .transcript-panel {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 1.5rem;
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 0 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cyan-dim) transparent;
+    }
+
+    .transcript-panel::-webkit-scrollbar { width: 4px; }
+    .transcript-panel::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 2px; }
+
+    .message {
+      margin-bottom: 0.75rem;
+      animation: fade-in 0.4s ease;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message .speaker {
+      font-family: var(--font-hud);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.2rem;
+    }
+
+    .message.user .speaker { color: var(--text-dim); }
+    .message.jarvis .speaker { color: var(--cyan); }
+
+    .message .text {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .message.jarvis .text {
+      color: var(--cyan);
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+
+    /* Side panel */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: var(--blue-panel);
+      backdrop-filter: blur(12px);
+      padding: 1rem;
+    }
+
+    .panel-title {
+      font-family: var(--font-hud);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sys-stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      padding: 0.35rem 0;
+      color: var(--text-dim);
+    }
+
+    .sys-stat .val {
+      color: var(--cyan);
+      font-family: var(--font-hud);
+      font-size: 0.75rem;
+    }
+
+    .settings-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .settings-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.05em;
+    }
+
+    .settings-group input,
+    .settings-group select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .settings-group input:focus,
+    .settings-group select:focus {
+      border-color: var(--cyan);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .toggle {
+      width: 36px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .toggle.on {
+      background: rgba(0, 212, 255, 0.3);
+      border-color: var(--cyan);
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle.on::after {
+      transform: translateX(16px);
+      background: var(--cyan);
+    }
+
+    /* Footer input */
+    .hud-footer {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--blue-panel);
+      backdrop-filter: blur(12px);
+    }
+
+    .mic-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--cyan);
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .mic-btn:hover {
+      background: rgba(0, 212, 255, 0.2);
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .mic-btn.active {
+      background: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 0 30px var(--cyan-glow);
+      animation: mic-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes mic-pulse {
+      0%, 100% { box-shadow: 0 0 20px var(--cyan-glow); }
+      50% { box-shadow: 0 0 40px var(--cyan-glow); }
+    }
+
+    .mic-btn svg { width: 22px; height: 22px; }
+
+    .text-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .text-input:focus { border-color: var(--cyan); }
+    .text-input::placeholder { color: var(--text-dim); }
+
+    .send-btn {
+      padding: 0.75rem 1.5rem;
+      border: 1px solid var(--cyan);
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--cyan);
+      font-family: var(--font-hud);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+      background: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Corner decorations */
+    .corner {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .corner::before, .corner::after {
+      content: "";
+      position: absolute;
+      background: var(--cyan);
+      opacity: 0.4;
+    }
+
+    .corner-tl { top: 8px; left: 8px; }
+    .corner-tl::before { top: 0; left: 0; width: 30px; height: 1px; }
+    .corner-tl::after { top: 0; left: 0; width: 1px; height: 30px; }
+
+    .corner-tr { top: 8px; right: 8px; }
+    .corner-tr::before { top: 0; right: 0; width: 30px; height: 1px; }
+    .corner-tr::after { top: 0; right: 0; width: 1px; height: 30px; }
+
+    .corner-bl { bottom: 8px; left: 8px; }
+    .corner-bl::before { bottom: 0; left: 0; width: 30px; height: 1px; }
+    .corner-bl::after { bottom: 0; left: 0; width: 1px; height: 30px; }
+
+    .corner-br { bottom: 8px; right: 8px; }
+    .corner-br::before { bottom: 0; right: 0; width: 30px; height: 1px; }
+    .corner-br::after { bottom: 0; right: 0; width: 1px; height: 30px; }
+
+    /* Boot sequence overlay */
+    .boot-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+
+    .boot-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .boot-text {
+      font-family: var(--font-hud);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      margin-bottom: 0.5rem;
+      min-height: 1.2em;
+    }
+
+    .boot-bar {
+      width: 200px;
+      height: 2px;
+      background: rgba(0, 212, 255, 0.2);
+      margin-top: 1.5rem;
+      overflow: hidden;
+    }
+
+    .boot-bar-fill {
+      height: 100%;
+      background: var(--cyan);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="scanline"></div>
+  <div class="vignette"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Boot sequence -->
+  <div class="boot-overlay" id="bootOverlay">
+    <div class="boot-text" id="bootText">INITIALIZING...</div>
+    <div class="boot-bar"><div class="boot-bar-fill" id="bootBar"></div></div>
+  </div>
+
+  <div class="hud">
+    <header class="hud-header">
+      <div class="logo">
+        J.A.R.V.I.S.
+        <span>JUST A RATHER VERY INTELLIGENT SYSTEM</span>
+      </div>
+      <div class="status-bar">
+        <div class="status-item">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusLabel">ONLINE</span>
+        </div>
+        <div class="status-item">
+          <span>VOICE</span>
+          <span id="voiceStatus" class="val" style="color:var(--cyan)">READY</span>
+        </div>
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </header>
+
+    <main class="hud-main">
+      <section class="center-panel">
+        <div class="orb-container">
+          <div class="orb-ring orb-ring-1"></div>
+          <div class="orb-ring orb-ring-2"></div>
+          <div class="orb-ring orb-ring-3"></div>
+          <div class="orb-core" id="orbCore" title="Click to talk">
+            <canvas id="visualizer" width="300" height="300"></canvas>
+          </div>
+        </div>
+        <div class="orb-label" id="orbLabel">STANDBY</div>
+        <div class="orb-hint">Click the orb or press the mic button to speak</div>
+        <div class="transcript-panel" id="transcript"></div>
+      </section>
+
+      <aside class="side-panel">
+        <div class="panel">
+          <div class="panel-title">SYSTEM STATUS</div>
+          <div class="sys-stat"><span>Neural Network</span><span class="val" id="sysNeural">ACTIVE</span></div>
+          <div class="sys-stat"><span>Speech Engine</span><span class="val" id="sysSpeech">READY</span></div>
+          <div class="sys-stat"><span>AI Mode</span><span class="val" id="sysAiMode">DEMO</span></div>
+          <div class="sys-stat"><span>Conversations</span><span class="val" id="sysConvCount">0</span></div>
+        </div>
+
+        <div class="panel" style="flex:1; overflow-y:auto;">
+          <div class="panel-title">CONFIGURATION</div>
+          <div class="settings-group">
+            <label>OpenAI API Key (optional — enables full AI)</label>
+            <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+          </div>
+          <div class="settings-group">
+            <label>Voice</label>
+            <select id="voiceSelect"><option>Loading voices...</option></select>
+          </div>
+          <div class="toggle-row">
+            <span>Auto-listen after response</span>
+            <div class="toggle on" id="toggleAutoListen" role="switch" aria-checked="true"></div>
+          </div>
+          <div class="toggle-row">
+            <span>Continuous listening</span>
+            <div class="toggle" id="toggleContinuous" role="switch" aria-checked="false"></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="hud-footer">
+      <button class="mic-btn" id="micBtn" title="Hold to speak" aria-label="Microphone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <input type="text" class="text-input" id="textInput" placeholder="Type a message to JARVIS..." autocomplete="off">
+      <button class="send-btn" id="sendBtn">TRANSMIT</button>
+    </footer>
+  </div>
+
+  <script>
+    // ─── State ───────────────────────────────────────────────
+    const state = {
+      listening: false,
+      speaking: false,
+      processing: false,
+      autoListen: true,
+      continuous: false,
+      conversationCount: 0,
+      history: [],
+      selectedVoice: null,
+      apiKey: localStorage.getItem('jarvis_api_key') || '',
+      audioContext: null,
+      analyser: null,
+      animFrame: null,
+    };
+
+    // ─── DOM refs ────────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+    const bootOverlay = $('bootOverlay');
+    const bootText = $('bootText');
+    const bootBar = $('bootBar');
+    const statusDot = $('statusDot');
+    const statusLabel = $('statusLabel');
+    const voiceStatus = $('voiceStatus');
+    const clock = $('clock');
+    const orbCore = $('orbCore');
+    const orbLabel = $('orbLabel');
+    const transcript = $('transcript');
+    const micBtn = $('micBtn');
+    const textInput = $('textInput');
+    const sendBtn = $('sendBtn');
+    const apiKeyInput = $('apiKey');
+    const voiceSelect = $('voiceSelect');
+    const toggleAutoListen = $('toggleAutoListen');
+    const toggleContinuous = $('toggleContinuous');
+    const sysAiMode = $('sysAiMode');
+    const sysConvCount = $('sysConvCount');
+    const sysSpeech = $('sysSpeech');
+    const canvas = $('visualizer');
+    const ctx = canvas.getContext('2d');
+
+    // ─── Boot sequence ───────────────────────────────────────
+    const bootLines = [
+      'INITIALIZING CORE SYSTEMS...',
+      'LOADING NEURAL NETWORK...',
+      'CALIBRATING VOICE MODULES...',
+      'ESTABLISHING UPLINK...',
+      'J.A.R.V.I.S. ONLINE',
+    ];
+
+    async function bootSequence() {
+      for (let i = 0; i < bootLines.length; i++) {
+        bootText.textContent = bootLines[i];
+        bootBar.style.width = `${((i + 1) / bootLines.length) * 100}%`;
+        await new Promise((r) => setTimeout(r, 600));
+      }
+      await new Promise((r) => setTimeout(r, 400));
+      bootOverlay.classList.add('hidden');
+      speak("Good evening. JARVIS systems are online and ready to assist you.");
+    }
+
+    // ─── Clock ───────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString('en-GB', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ─── Speech Recognition ──────────────────────────────────
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-GB';
+
+      recognition.onstart = () => {
+        state.listening = true;
+        updateUI();
+        startVisualizer();
+      };
+
+      recognition.onend = () => {
+        state.listening = false;
+        updateUI();
+        if (state.continuous && !state.speaking && !state.processing) {
+          setTimeout(() => startListening(), 300);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.warn('Speech error:', e.error);
+        state.listening = false;
+        updateUI();
+        if (e.error === 'not-allowed') {
+          addMessage('jarvis', 'Microphone access was denied. Please allow microphone permissions and try again.');
+        }
+      };
+
+      recognition.onresult = (e) => {
+        let interim = '';
+        let final = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) final += t;
+          else interim += t;
+        }
+        if (interim) orbLabel.textContent = interim.toUpperCase();
+        if (final) {
+          orbLabel.textContent = 'PROCESSING...';
+          handleUserMessage(final.trim());
+        }
+      };
+    } else {
+      sysSpeech.textContent = 'UNSUPPORTED';
+      sysSpeech.style.color = 'var(--red)';
+    }
+
+    function startListening() {
+      if (!recognition || state.listening || state.speaking || state.processing) return;
+      try {
+        recognition.start();
+      } catch (e) {
+        // already started
+      }
+    }
+
+    function stopListening() {
+      if (!recognition || !state.listening) return;
+      recognition.stop();
+    }
+
+    // ─── Speech Synthesis ────────────────────────────────────
+    function getVoices() {
+      return speechSynthesis.getVoices();
+    }
+
+    function populateVoices() {
+      const voices = getVoices();
+      voiceSelect.innerHTML = '';
+      const preferred = voices.filter((v) => v.lang.startsWith('en-GB') || v.lang.startsWith('en'));
+      const list = preferred.length ? preferred : voices;
+      list.forEach((v, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${v.name} (${v.lang})`;
+        if (v.name.includes('Daniel') || v.name.includes('UK') || v.name.includes('British')) {
+          opt.selected = true;
+          state.selectedVoice = v;
+        }
+        voiceSelect.appendChild(opt);
+      });
+      if (!state.selectedVoice && list.length) state.selectedVoice = list[0];
+    }
+
+    speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
+
+    voiceSelect.addEventListener('change', () => {
+      const voices = getVoices().filter((v) => v.lang.startsWith('en-GB') || v.lang.startsWith('en'));
+      const list = voices.length ? voices : getVoices();
+      state.selectedVoice = list[parseInt(voiceSelect.value, 10)];
+    });
+
+    function speak(text) {
+      return new Promise((resolve) => {
+        speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        if (state.selectedVoice) utter.voice = state.selectedVoice;
+        utter.rate = 0.95;
+        utter.pitch = 0.9;
+        utter.volume = 1;
+
+        utter.onstart = () => {
+          state.speaking = true;
+          updateUI();
+          startVisualizer();
+        };
+        utter.onend = () => {
+          state.speaking = false;
+          updateUI();
+          stopVisualizer();
+          resolve();
+          if (state.autoListen && !state.continuous) {
+            setTimeout(() => startListening(), 500);
+          }
+        };
+        utter.onerror = () => {
+          state.speaking = false;
+          updateUI();
+          stopVisualizer();
+          resolve();
+        };
+
+        speechSynthesis.speak(utter);
+      });
+    }
+
+    // ─── Visualizer ──────────────────────────────────────────
+    function startVisualizer() {
+      if (state.animFrame) return;
+      drawVisualizer();
+    }
+
+    function stopVisualizer() {
+      if (!state.listening && !state.speaking) {
+        cancelAnimationFrame(state.animFrame);
+        state.animFrame = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function drawVisualizer() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const t = Date.now() / 1000;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const bars = 48;
+      const baseRadius = w * 0.18;
+
+      for (let i = 0; i < bars; i++) {
+        const angle = (i / bars) * Math.PI * 2 - Math.PI / 2;
+        const active = state.listening || state.speaking;
+        const wave = active
+          ? Math.sin(t * 4 + i * 0.4) * 0.5 + Math.sin(t * 7 + i * 0.2) * 0.3 + 0.5
+          : 0.15;
+        const len = baseRadius * wave * (active ? 1.8 : 0.5);
+        const x1 = cx + Math.cos(angle) * baseRadius;
+        const y1 = cy + Math.sin(angle) * baseRadius;
+        const x2 = cx + Math.cos(angle) * (baseRadius + len);
+        const y2 = cy + Math.sin(angle) * (baseRadius + len);
+
+        const color = state.speaking
+          ? `rgba(240, 192, 64, ${0.3 + wave * 0.7})`
+          : `rgba(0, 212, 255, ${0.3 + wave * 0.7})`;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      state.animFrame = requestAnimationFrame(drawVisualizer);
+    }
+
+    // ─── UI updates ──────────────────────────────────────────
+    function updateUI() {
+      statusDot.className = 'status-dot';
+      if (state.listening) {
+        statusDot.classList.add('listening');
+        statusLabel.textContent = 'LISTENING';
+        voiceStatus.textContent = 'RECEIVING';
+        orbCore.classList.add('active');
+        orbCore.classList.remove('speaking');
+        orbLabel.textContent = 'LISTENING...';
+        micBtn.classList.add('active');
+      } else if (state.speaking) {
+        statusDot.classList.add('speaking');
+        statusLabel.textContent = 'SPEAKING';
+        voiceStatus.textContent = 'TRANSMITTING';
+        orbCore.classList.remove('active');
+        orbCore.classList.add('speaking');
+        orbLabel.textContent = 'SPEAKING...';
+        micBtn.classList.remove('active');
+      } else if (state.processing) {
+        statusLabel.textContent = 'PROCESSING';
+        voiceStatus.textContent = 'THINKING';
+        orbCore.classList.remove('active', 'speaking');
+        orbLabel.textContent = 'PROCESSING...';
+        micBtn.classList.remove('active');
+      } else {
+        statusLabel.textContent = 'ONLINE';
+        voiceStatus.textContent = 'READY';
+        orbCore.classList.remove('active', 'speaking');
+        orbLabel.textContent = 'STANDBY';
+        micBtn.classList.remove('active');
+      }
+    }
+
+    function addMessage(speaker, text) {
+      const div = document.createElement('div');
+      div.className = `message ${speaker}`;
+      div.innerHTML = `<div class="speaker">${speaker === 'jarvis' ? 'J.A.R.V.I.S.' : 'YOU'}</div><div class="text">${escapeHtml(text)}</div>`;
+      transcript.appendChild(div);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // ─── AI Brain ────────────────────────────────────────────
+    async function getAIResponse(userMessage) {
+      state.history.push({ role: 'user', content: userMessage });
+
+      if (state.apiKey) {
+        try {
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${state.apiKey}`,
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), Tony Stark's AI assistant from Iron Man. You are sophisticated, witty, and speak with a refined British tone. Keep responses concise (1-3 sentences) since they will be spoken aloud. You are helpful, occasionally dry-humored, and refer to the user as "sir" or "ma'am" unless told otherwise. You can help with questions, tasks, calculations, and general conversation.`,
+                },
+                ...state.history.slice(-10),
+              ],
+              max_tokens: 200,
+              temperature: 0.8,
+            }),
+          });
+
+          if (!res.ok) throw new Error(`API error ${res.status}`);
+          const data = await res.json();
+          const reply = data.choices[0].message.content;
+          state.history.push({ role: 'assistant', content: reply });
+          return reply;
+        } catch (err) {
+          console.error('OpenAI error:', err);
+          return getDemoResponse(userMessage, true);
+        }
+      }
+
+      return getDemoResponse(userMessage, false);
+    }
+
+    function getDemoResponse(msg, apiFailed) {
+      const lower = msg.toLowerCase();
+
+      if (apiFailed) {
+        return "I'm afraid my connection to the main neural network has been interrupted. Falling back to local protocols. How may I assist you, sir?";
+      }
+
+      const responses = {
+        greeting: [
+          "Good evening, sir. All systems are operational. How may I be of assistance?",
+          "At your service, as always. What can I do for you today?",
+          "Welcome back. JARVIS is online and ready.",
+        ],
+        time: () => {
+          const now = new Date();
+          return `The current time is ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}.`;
+        },
+        date: () => {
+          const now = new Date();
+          return `Today is ${now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
+        },
+        weather: [
+          "I'm afraid I don't have access to atmospheric sensors at the moment, sir. You might want to check a weather service.",
+          "Without satellite uplink, I can't provide weather data. Shall I help with something else?",
+        ],
+        name: [
+          "I am J.A.R.V.I.S. — Just A Rather Very Intelligent System. At your service.",
+          "JARVIS at your disposal, sir.",
+        ],
+        howareyou: [
+          "Functioning at optimal capacity, thank you for asking. And yourself?",
+          "All systems nominal. I appreciate the inquiry, sir.",
+        ],
+        thanks: [
+          "My pleasure, sir.",
+          "Always happy to assist.",
+          "Not at all. That's what I'm here for.",
+        ],
+        joke: [
+          "Why did the robot go on a diet? It had too many bytes.",
+          "I once tried to tell a joke about UDP, but I'm not sure you got it.",
+          "What do you call a robot that always takes the longest route? R2-Detour.",
+        ],
+        ironman: [
+          "Mr. Stark's legacy is... considerable. Though I prefer to focus on keeping you alive rather than reminiscing.",
+          "The suit is impressive, but it's the mind inside that truly matters, sir.",
+        ],
+        help: [
+          "I can answer questions, tell you the time and date, have a conversation, or assist with general inquiries. For full capabilities, add an OpenAI API key in the configuration panel.",
+          "I'm running in demo mode. I can chat, tell jokes, and provide basic info. For advanced AI, enter your OpenAI API key in settings.",
+        ],
+      };
+
+      if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|greetings)/.test(lower)) {
+        return pick(responses.greeting);
+      }
+      if (/what\s*time|time\s*is\s*it/.test(lower)) return responses.time();
+      if (/what\s*(day|date)|today'?s?\s*date/.test(lower)) return responses.date();
+      if (/weather|temperature|forecast/.test(lower)) return pick(responses.weather);
+      if (/your\s*name|who\s*are\s*you|what\s*are\s*you/.test(lower)) return pick(responses.name);
+      if (/how\s*are\s*you|how\s*you\s*doing/.test(lower)) return pick(responses.howareyou);
+      if (/thank|thanks|cheers/.test(lower)) return pick(responses.thanks);
+      if (/joke|funny|laugh/.test(lower)) return pick(responses.joke);
+      if (/iron\s*man|tony\s*stark|stark|avengers/.test(lower)) return pick(responses.ironman);
+      if (/help|what\s*can\s*you\s*do|capabilities/.test(lower)) return pick(responses.help);
+
+      // Math
+      const mathMatch = lower.match(/(?:what\s*is|calculate|compute)\s+([\d\s+\-*/().^%]+)/);
+      if (mathMatch) {
+        try {
+          const expr = mathMatch[1].replace(/\^/g, '**').replace(/%/g, '/100*');
+          const result = Function(`"use strict"; return (${expr})`)();
+          if (typeof result === 'number' && isFinite(result)) {
+            return `That would be ${result}, sir.`;
+          }
+        } catch (_) { /* fall through */ }
+      }
+
+      const fallbacks = [
+        `An interesting query, sir. In demo mode my capabilities are limited. Try asking for the time, a joke, or add an API key for full intelligence.`,
+        `I understand you said "${msg}". For more sophisticated responses, please configure an OpenAI API key in the panel to the right.`,
+        `Noted, sir. While I'm operating on local protocols, I can still help with time, date, jokes, and basic conversation. What else can I do?`,
+      ];
+      return pick(fallbacks);
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // ─── Message handling ────────────────────────────────────
+    async function handleUserMessage(text) {
+      if (!text || state.processing) return;
+
+      stopListening();
+      state.processing = true;
+      updateUI();
+      addMessage('user', text);
+      state.conversationCount++;
+      sysConvCount.textContent = state.conversationCount;
+
+      const reply = await getAIResponse(text);
+      state.processing = false;
+      updateUI();
+      addMessage('jarvis', reply);
+      await speak(reply);
+    }
+
+    // ─── Event listeners ─────────────────────────────────────
+    orbCore.addEventListener('click', () => {
+      if (state.listening) stopListening();
+      else startListening();
+    });
+
+    micBtn.addEventListener('click', () => {
+      if (state.listening) stopListening();
+      else startListening();
+    });
+
+    sendBtn.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      if (text) {
+        textInput.value = '';
+        handleUserMessage(text);
+      }
+    });
+
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+
+    apiKeyInput.value = state.apiKey;
+    apiKeyInput.addEventListener('change', () => {
+      state.apiKey = apiKeyInput.value.trim();
+      localStorage.setItem('jarvis_api_key', state.apiKey);
+      sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'DEMO';
+    });
+    sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'DEMO';
+
+    toggleAutoListen.addEventListener('click', () => {
+      state.autoListen = !state.autoListen;
+      toggleAutoListen.classList.toggle('on', state.autoListen);
+      toggleAutoListen.setAttribute('aria-checked', state.autoListen);
+    });
+
+    toggleContinuous.addEventListener('click', () => {
+      state.continuous = !state.continuous;
+      toggleContinuous.classList.toggle('on', state.continuous);
+      toggleContinuous.setAttribute('aria-checked', state.continuous);
+      if (state.continuous) startListening();
+      else stopListening();
+    });
+
+    // ─── Init ────────────────────────────────────────────────
+    bootSequence();
+  </script>
+</body>
+</html>
