@@ -23,11 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build site
+        run: |
+          mkdir -p public
+          cp -r jarvis-demo shawarma-queen-demo public/
+          cp pages-index.html public/index.html
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: shawarma-queen-demo
+          path: public
 
       - id: deployment
         uses: actions/deploy-pages@v4
