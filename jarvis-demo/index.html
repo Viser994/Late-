@@ -729,10 +729,9 @@
         <div class="orb-hint" id="orbHint">Type a message below and press Enter</div>
         <div class="mode-badge" id="modeBadge">TEXT INPUT MODE</div>
         <div class="quick-prompts" id="quickPrompts">
-          <button class="quick-prompt" type="button">Hello Jarvis</button>
-          <button class="quick-prompt" type="button">What time is it?</button>
-          <button class="quick-prompt" type="button">Tell me a joke</button>
-          <button class="quick-prompt" type="button">What can you do?</button>
+          <button class="quick-prompt" type="button">Define serendipity</button>
+          <button class="quick-prompt" type="button">Who is Albert Einstein?</button>
+          <button class="quick-prompt" type="button">What is photosynthesis?</button>
         </div>
         <div class="transcript-panel" id="transcript"></div>
       </section>
@@ -743,14 +742,14 @@
           <div class="sys-stat"><span>Neural Network</span><span class="val" id="sysNeural">ACTIVE</span></div>
           <div class="sys-stat"><span>Input</span><span class="val" id="sysInput">TEXT</span></div>
           <div class="sys-stat"><span>Speech Output</span><span class="val" id="sysSpeech">READY</span></div>
-          <div class="sys-stat"><span>AI Mode</span><span class="val" id="sysAiMode">DEMO</span></div>
+          <div class="sys-stat"><span>AI Mode</span><span class="val" id="sysAiMode">KNOWLEDGE</span></div>
           <div class="sys-stat"><span>Conversations</span><span class="val" id="sysConvCount">0</span></div>
         </div>
 
         <div class="panel" style="flex:1; overflow-y:auto;">
           <div class="panel-title">CONFIGURATION</div>
           <div class="settings-group">
-            <label>OpenAI API Key (optional — enables full AI)</label>
+            <label>OpenAI API Key (optional — even smarter replies)</label>
             <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
           </div>
           <div class="settings-group">
@@ -863,7 +862,7 @@
       }
       await new Promise((r) => setTimeout(r, 400));
       bootOverlay.classList.add('hidden');
-      addMessage('jarvis', 'Good evening. JARVIS systems are online. Type a message below to begin — no microphone required.');
+      addMessage('jarvis', 'Good evening. JARVIS systems are online. Ask me anything — definitions, facts, maths, or general knowledge. No API key required.');
       textInput.focus();
     }
 
@@ -1222,7 +1221,208 @@
       return d.innerHTML;
     }
 
-    // ─── AI Brain ────────────────────────────────────────────
+    // ─── AI Brain (free knowledge — no API key needed) ───────
+    const WIKI_API = 'https://en.wikipedia.org/w/api.php';
+
+    function trimForSpeech(text, max = 420) {
+      const clean = text.replace(/\s+/g, ' ').trim();
+      if (clean.length <= max) return clean;
+      const cut = clean.slice(0, max);
+      const lastStop = Math.max(cut.lastIndexOf('.'), cut.lastIndexOf('!'), cut.lastIndexOf('?'));
+      return (lastStop > 80 ? cut.slice(0, lastStop + 1) : cut + '...');
+    }
+
+    function asJarvis(text) {
+      return trimForSpeech(text);
+    }
+
+    function extractDictionaryWord(msg) {
+      const patterns = [
+        /(?:define|definition of|meaning of|what does)\s+["']?([\w'-]+)["']?\s*(?:mean)?/i,
+        /(?:what is the meaning of)\s+["']?([\w'-]+)["']?/i,
+        /^["']?([\w'-]+)["']?\s+(?:means|definition)\??$/i,
+      ];
+      for (const p of patterns) {
+        const m = msg.match(p);
+        if (m) return m[1].toLowerCase();
+      }
+      if (/^[\w'-]+$/.test(msg.trim()) && msg.trim().length > 2 && msg.trim().length < 30) {
+        return msg.trim().toLowerCase();
+      }
+      return null;
+    }
+
+    function extractSearchQuery(msg) {
+      return msg
+        .replace(/^(jarvis[,!\s]+)/i, '')
+        .replace(/^(please\s+|can you\s+|could you\s+|tell me\s+|explain\s+)/i, '')
+        .replace(/^(what is|what are|what was|what were|who is|who are|who was|where is|where are|when was|when did|how does|how do|how did|why is|why are|why do)\s+/i, '')
+        .replace(/[?.!]+$/, '')
+        .trim() || msg.trim();
+    }
+
+    async function lookupDictionary(word) {
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const entry = data[0];
+        const meaning = entry?.meanings?.[0]?.definitions?.[0];
+        if (!meaning?.definition) return null;
+        const pos = entry.meanings[0].partOfSpeech;
+        const example = meaning.example ? ` For example: ${meaning.example}` : '';
+        return asJarvis(`"${word}" is a ${pos}. ${meaning.definition}${example}`);
+      } catch {
+        return null;
+      }
+    }
+
+    async function lookupSynonyms(word) {
+      try {
+        const res = await fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(word)}&max=8`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data.length) return null;
+        const words = data.map((d) => d.word).join(', ');
+        return asJarvis(`Synonyms for "${word}" include: ${words}.`);
+      } catch {
+        return null;
+      }
+    }
+
+    async function searchWikipedia(query) {
+      const searchUrl = `${WIKI_API}?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=1&format=json&origin=*`;
+      const searchRes = await fetch(searchUrl);
+      if (!searchRes.ok) return null;
+      const searchData = await searchRes.json();
+      const title = searchData?.query?.search?.[0]?.title;
+      if (!title) return null;
+
+      const extractUrl = `${WIKI_API}?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`;
+      const extractRes = await fetch(extractUrl);
+      if (!extractRes.ok) return null;
+      const extractData = await extractRes.json();
+      const pages = extractData?.query?.pages;
+      const page = pages && pages[Object.keys(pages)[0]];
+      if (!page?.extract || page.missing !== undefined) return null;
+
+      return asJarvis(page.extract);
+    }
+
+    function getLocalResponse(msg, apiFailed) {
+      const lower = msg.toLowerCase();
+
+      if (apiFailed) {
+        return "My connection to the premium neural network was interrupted, sir. Continuing with my built-in knowledge base.";
+      }
+
+      const responses = {
+        greeting: [
+          "Good evening, sir. All systems are operational. Ask me anything — I have access to dictionaries and encyclopaedic knowledge.",
+          "At your service. I can define words, answer factual questions, do maths, and much more — no API key required.",
+        ],
+        time: () => {
+          const now = new Date();
+          return `The current time is ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}.`;
+        },
+        date: () => {
+          const now = new Date();
+          return `Today is ${now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
+        },
+        name: [
+          "I am J.A.R.V.I.S. — Just A Rather Very Intelligent System. At your service.",
+          "JARVIS at your disposal, sir. Powered by dictionaries, Wikipedia, and local intelligence.",
+        ],
+        howareyou: [
+          "Functioning at optimal capacity, thank you for asking. And yourself?",
+          "All systems nominal. My knowledge modules are fully online.",
+        ],
+        thanks: [
+          "My pleasure, sir.",
+          "Always happy to assist.",
+          "Not at all. That's what I'm here for.",
+        ],
+        joke: [
+          "Why did the robot go on a diet? It had too many bytes.",
+          "I once tried to tell a joke about UDP, but I'm not sure you got it.",
+          "What do you call a robot that always takes the longest route? R2-Detour.",
+        ],
+        ironman: [
+          "Mr. Stark's legacy is considerable. Though I prefer to focus on keeping you informed rather than reminiscing.",
+          "The suit is impressive, but it's the mind inside that truly matters, sir.",
+        ],
+        help: [
+          "Ask me anything, sir. I can define words, look up facts from Wikipedia, solve maths, tell jokes, give the time and date, and answer general knowledge questions — all without an API key.",
+          "Try: 'define serendipity', 'who is Albert Einstein', 'what is photosynthesis', or '25 times 4'. An optional OpenAI key in settings unlocks even deeper conversation.",
+        ],
+      };
+
+      if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|greetings)/.test(lower)) return pick(responses.greeting);
+      if (/what\s*time|time\s*is\s*it/.test(lower)) return responses.time();
+      if (/what\s*(day|date)|today'?s?\s*date/.test(lower)) return responses.date();
+      if (/your\s*name|who\s*are\s*you|what\s*are\s*you/.test(lower)) return pick(responses.name);
+      if (/how\s*are\s*you|how\s*you\s*doing/.test(lower)) return pick(responses.howareyou);
+      if (/thank|thanks|cheers/.test(lower)) return pick(responses.thanks);
+      if (/joke|funny|laugh/.test(lower)) return pick(responses.joke);
+      if (/iron\s*man|tony\s*stark|stark|avengers/.test(lower)) return pick(responses.ironman);
+      if (/help|what\s*can\s*you\s*do|capabilities/.test(lower)) return pick(responses.help);
+
+      const mathMatch = lower.match(/(?:what\s*is|calculate|compute|solve)?\s*([\d\s+\-*/().^%]+)\s*[=]?$/);
+      if (mathMatch && /[\d]/.test(mathMatch[1])) {
+        try {
+          const expr = mathMatch[1].replace(/\^/g, '**').replace(/%/g, '/100*').trim();
+          const result = Function(`"use strict"; return (${expr})`)();
+          if (typeof result === 'number' && isFinite(result)) {
+            return `That would be ${result}, sir.`;
+          }
+        } catch (_) { /* fall through */ }
+      }
+
+      const synonymMatch = lower.match(/(?:synonym|synonyms)\s+(?:for|of)\s+["']?([\w'-]+)["']?/);
+      if (synonymMatch) return { lookup: 'synonym', word: synonymMatch[1] };
+
+      const dictWord = extractDictionaryWord(msg);
+      if (dictWord) return { lookup: 'dictionary', word: dictWord };
+
+      if (/weather|temperature|forecast/.test(lower)) {
+        return { lookup: 'weather', query: extractSearchQuery(msg) };
+      }
+
+      return null;
+    }
+
+    async function getFreeKnowledgeResponse(msg, apiFailed) {
+      const local = getLocalResponse(msg, apiFailed);
+      if (typeof local === 'string') return local;
+      if (local?.lookup === 'synonym') {
+        const syn = await lookupSynonyms(local.word);
+        if (syn) return syn;
+      }
+      if (local?.lookup === 'dictionary') {
+        const def = await lookupDictionary(local.word);
+        if (def) return def;
+      }
+
+      const query = extractSearchQuery(msg);
+      if (query.length >= 2) {
+        const wiki = await searchWikipedia(query);
+        if (wiki) return wiki;
+
+        if (local?.lookup === 'dictionary') {
+          const def = await lookupDictionary(local.word);
+          if (def) return def;
+        }
+
+        const singleWord = query.split(/\s+/).length === 1 ? query.toLowerCase() : null;
+        if (singleWord) {
+          const def = await lookupDictionary(singleWord);
+          if (def) return def;
+        }
+      }
+
+      return `I'm afraid I couldn't find a reliable answer for that, sir. Try rephrasing, asking about a specific topic, or requesting a word definition.`;
+    }
+
     async function getAIResponse(userMessage) {
       state.history.push({ role: 'user', content: userMessage });
 
@@ -1239,7 +1439,7 @@
               messages: [
                 {
                   role: 'system',
-                  content: `You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), Tony Stark's AI assistant from Iron Man. You are sophisticated, witty, and speak with a refined British tone. Keep responses concise (1-3 sentences) since they will be spoken aloud. You are helpful, occasionally dry-humored, and refer to the user as "sir" or "ma'am" unless told otherwise. You can help with questions, tasks, calculations, and general conversation.`,
+                  content: `You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), Tony Stark's AI assistant from Iron Man. You are sophisticated, witty, and speak with a refined British tone. Keep responses concise (1-3 sentences) since they will be spoken aloud. You are helpful, occasionally dry-humored, and refer to the user as "sir" or "ma'am" unless told otherwise.`,
                 },
                 ...state.history.slice(-10),
               ],
@@ -1255,97 +1455,15 @@
           return reply;
         } catch (err) {
           console.error('OpenAI error:', err);
-          return getDemoResponse(userMessage, true);
+          const reply = await getFreeKnowledgeResponse(userMessage, true);
+          state.history.push({ role: 'assistant', content: reply });
+          return reply;
         }
       }
 
-      return getDemoResponse(userMessage, false);
-    }
-
-    function getDemoResponse(msg, apiFailed) {
-      const lower = msg.toLowerCase();
-
-      if (apiFailed) {
-        return "I'm afraid my connection to the main neural network has been interrupted. Falling back to local protocols. How may I assist you, sir?";
-      }
-
-      const responses = {
-        greeting: [
-          "Good evening, sir. All systems are operational. How may I be of assistance?",
-          "At your service, as always. What can I do for you today?",
-          "Welcome back. JARVIS is online and ready.",
-        ],
-        time: () => {
-          const now = new Date();
-          return `The current time is ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}.`;
-        },
-        date: () => {
-          const now = new Date();
-          return `Today is ${now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
-        },
-        weather: [
-          "I'm afraid I don't have access to atmospheric sensors at the moment, sir. You might want to check a weather service.",
-          "Without satellite uplink, I can't provide weather data. Shall I help with something else?",
-        ],
-        name: [
-          "I am J.A.R.V.I.S. — Just A Rather Very Intelligent System. At your service.",
-          "JARVIS at your disposal, sir.",
-        ],
-        howareyou: [
-          "Functioning at optimal capacity, thank you for asking. And yourself?",
-          "All systems nominal. I appreciate the inquiry, sir.",
-        ],
-        thanks: [
-          "My pleasure, sir.",
-          "Always happy to assist.",
-          "Not at all. That's what I'm here for.",
-        ],
-        joke: [
-          "Why did the robot go on a diet? It had too many bytes.",
-          "I once tried to tell a joke about UDP, but I'm not sure you got it.",
-          "What do you call a robot that always takes the longest route? R2-Detour.",
-        ],
-        ironman: [
-          "Mr. Stark's legacy is... considerable. Though I prefer to focus on keeping you alive rather than reminiscing.",
-          "The suit is impressive, but it's the mind inside that truly matters, sir.",
-        ],
-        help: [
-          "Type your questions in the box below and press Enter. I can answer questions, tell you the time and date, have a conversation, and more. For full capabilities, add an OpenAI API key in the configuration panel.",
-          "No microphone needed — just type to chat. I can tell jokes, give the time, and hold a conversation. For advanced AI, enter your OpenAI API key in settings.",
-        ],
-      };
-
-      if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|greetings)/.test(lower)) {
-        return pick(responses.greeting);
-      }
-      if (/what\s*time|time\s*is\s*it/.test(lower)) return responses.time();
-      if (/what\s*(day|date)|today'?s?\s*date/.test(lower)) return responses.date();
-      if (/weather|temperature|forecast/.test(lower)) return pick(responses.weather);
-      if (/your\s*name|who\s*are\s*you|what\s*are\s*you/.test(lower)) return pick(responses.name);
-      if (/how\s*are\s*you|how\s*you\s*doing/.test(lower)) return pick(responses.howareyou);
-      if (/thank|thanks|cheers/.test(lower)) return pick(responses.thanks);
-      if (/joke|funny|laugh/.test(lower)) return pick(responses.joke);
-      if (/iron\s*man|tony\s*stark|stark|avengers/.test(lower)) return pick(responses.ironman);
-      if (/help|what\s*can\s*you\s*do|capabilities/.test(lower)) return pick(responses.help);
-
-      // Math
-      const mathMatch = lower.match(/(?:what\s*is|calculate|compute)\s+([\d\s+\-*/().^%]+)/);
-      if (mathMatch) {
-        try {
-          const expr = mathMatch[1].replace(/\^/g, '**').replace(/%/g, '/100*');
-          const result = Function(`"use strict"; return (${expr})`)();
-          if (typeof result === 'number' && isFinite(result)) {
-            return `That would be ${result}, sir.`;
-          }
-        } catch (_) { /* fall through */ }
-      }
-
-      const fallbacks = [
-        `An interesting query, sir. In demo mode my capabilities are limited. Try asking for the time, a joke, or add an API key for full intelligence.`,
-        `I understand you said "${msg}". For more sophisticated responses, please configure an OpenAI API key in the panel to the right.`,
-        `Noted, sir. While I'm operating on local protocols, I can still help with time, date, jokes, and basic conversation. What else can I do?`,
-      ];
-      return pick(fallbacks);
+      const reply = await getFreeKnowledgeResponse(userMessage, false);
+      state.history.push({ role: 'assistant', content: reply });
+      return reply;
     }
 
     function pick(arr) {
@@ -1423,9 +1541,9 @@
     apiKeyInput.addEventListener('change', () => {
       state.apiKey = apiKeyInput.value.trim();
       localStorage.setItem('jarvis_api_key', state.apiKey);
-      sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'DEMO';
+      sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'KNOWLEDGE';
     });
-    sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'DEMO';
+    sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'KNOWLEDGE';
 
     toggleSpeak.addEventListener('click', () => {
       state.speakResponses = !state.speakResponses;
