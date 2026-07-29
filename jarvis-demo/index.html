@@ -567,8 +567,34 @@
       margin-top: 0.35rem;
     }
 
-    .mic-settings { display: block; }
-    .text-only .mic-settings { display: none; }
+    .enable-talk-btn {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--cyan);
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--cyan);
+      font-family: var(--font-hud);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .enable-talk-btn:hover {
+      background: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .settings-note {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.4rem;
+      line-height: 1.4;
+    }
+
+    .talk-options { display: none; }
+    .talk-enabled .talk-options { display: block; }
+    .talk-enabled #enableTalkRow { display: none; }
 
     .orb-core.text-focus {
       cursor: text;
@@ -735,14 +761,20 @@
             <span>Speak responses aloud</span>
             <div class="toggle on" id="toggleSpeak" role="switch" aria-checked="true"></div>
           </div>
-          <div class="mic-settings">
-            <div class="toggle-row">
-              <span>Auto-listen after response</span>
-              <div class="toggle" id="toggleAutoListen" role="switch" aria-checked="false"></div>
+          <div class="mic-settings" id="micSettings">
+            <div id="enableTalkRow" class="settings-group">
+              <button type="button" class="enable-talk-btn" id="enableTalkBtn">ENABLE TALK MODE</button>
+              <p class="settings-note">Turn on your microphone to speak to JARVIS instead of typing.</p>
             </div>
-            <div class="toggle-row">
-              <span>Continuous listening</span>
-              <div class="toggle" id="toggleContinuous" role="switch" aria-checked="false"></div>
+            <div class="talk-options">
+              <div class="toggle-row">
+                <span>Auto-listen after response</span>
+                <div class="toggle" id="toggleAutoListen" role="switch" aria-checked="false"></div>
+              </div>
+              <div class="toggle-row">
+                <span>Continuous listening</span>
+                <div class="toggle" id="toggleContinuous" role="switch" aria-checked="false"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -809,6 +841,8 @@
     const sysConvCount = $('sysConvCount');
     const sysSpeech = $('sysSpeech');
     const sysInput = $('sysInput');
+    const micSettings = $('micSettings');
+    const enableTalkBtn = $('enableTalkBtn');
     const canvas = $('visualizer');
     const ctx = canvas.getContext('2d');
 
@@ -836,6 +870,7 @@
     function enableTextOnlyMode() {
       state.micAvailable = false;
       document.body.classList.add('text-only');
+      document.body.classList.remove('talk-enabled');
       micBtn.classList.add('hidden');
       orbCore.classList.add('text-focus');
       orbCore.title = 'Click to focus text input';
@@ -850,6 +885,7 @@
     function enableMicMode() {
       state.micAvailable = true;
       document.body.classList.remove('text-only');
+      document.body.classList.add('talk-enabled');
       micBtn.classList.remove('hidden');
       orbCore.classList.remove('text-focus');
       orbCore.title = 'Click to talk';
@@ -867,7 +903,27 @@
         const hasRealMic = mics.some((d) => d.label && d.deviceId);
         if (hasRealMic) enableMicMode();
       } catch {
-        // Stay in text-only mode
+        // Stay in text-only mode until user clicks Enable Talk Mode
+      }
+    }
+
+    async function requestTalkMode() {
+      if (!recognition) {
+        addMessage('jarvis', 'Speech recognition is not available in this browser. Please use Microsoft Edge or Google Chrome, or continue typing below.');
+        return;
+      }
+
+      try {
+        if (navigator.mediaDevices?.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach((track) => track.stop());
+        }
+        enableMicMode();
+        unlockSpeech();
+        addMessage('jarvis', 'Talk mode enabled, sir. Click the microphone or the center orb, then speak. Turn on continuous listening in settings for hands-free conversation.');
+        startListening();
+      } catch {
+        addMessage('jarvis', 'Microphone access was blocked. Please allow microphone access for this site in Edge settings, then click Enable Talk Mode again.');
       }
     }
 
@@ -1393,6 +1449,8 @@
       if (state.continuous) startListening();
       else stopListening();
     });
+
+    enableTalkBtn.addEventListener('click', requestTalkMode);
 
     // ─── Init ────────────────────────────────────────────────
     enableTextOnlyMode();
