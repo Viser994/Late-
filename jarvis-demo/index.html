@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>J.A.R.V.I.S. — Just A Rather Very Intelligent System</title>
-  <meta name="description" content="Talk to JARVIS — your AI assistant inspired by Iron Man. Voice-powered conversation with a holographic HUD interface.">
+  <meta name="description" content="Chat with JARVIS — your AI assistant inspired by Iron Man. Type to talk, hear spoken replies. Works in Edge with or without a microphone.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -530,6 +530,55 @@
       cursor: not-allowed;
     }
 
+    .mic-btn.hidden { display: none; }
+
+    .quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 0.75rem;
+      max-width: 600px;
+      padding: 0 1rem;
+    }
+
+    .quick-prompt {
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.4rem 0.75rem;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-prompt:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.15);
+    }
+
+    .mode-badge {
+      font-family: var(--font-hud);
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-top: 0.35rem;
+    }
+
+    .mic-settings { display: block; }
+    .text-only .mic-settings { display: none; }
+
+    .orb-core.text-focus {
+      cursor: text;
+    }
+
+    .orb-core.text-focus:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 40px rgba(240, 192, 64, 0.3);
+    }
+
     /* Corner decorations */
     .corner {
       position: fixed;
@@ -651,7 +700,14 @@
           </div>
         </div>
         <div class="orb-label" id="orbLabel">STANDBY</div>
-        <div class="orb-hint">Click the orb or press the mic button to speak</div>
+        <div class="orb-hint" id="orbHint">Type a message below and press Enter</div>
+        <div class="mode-badge" id="modeBadge">TEXT INPUT MODE</div>
+        <div class="quick-prompts" id="quickPrompts">
+          <button class="quick-prompt" type="button">Hello Jarvis</button>
+          <button class="quick-prompt" type="button">What time is it?</button>
+          <button class="quick-prompt" type="button">Tell me a joke</button>
+          <button class="quick-prompt" type="button">What can you do?</button>
+        </div>
         <div class="transcript-panel" id="transcript"></div>
       </section>
 
@@ -659,7 +715,8 @@
         <div class="panel">
           <div class="panel-title">SYSTEM STATUS</div>
           <div class="sys-stat"><span>Neural Network</span><span class="val" id="sysNeural">ACTIVE</span></div>
-          <div class="sys-stat"><span>Speech Engine</span><span class="val" id="sysSpeech">READY</span></div>
+          <div class="sys-stat"><span>Input</span><span class="val" id="sysInput">TEXT</span></div>
+          <div class="sys-stat"><span>Speech Output</span><span class="val" id="sysSpeech">READY</span></div>
           <div class="sys-stat"><span>AI Mode</span><span class="val" id="sysAiMode">DEMO</span></div>
           <div class="sys-stat"><span>Conversations</span><span class="val" id="sysConvCount">0</span></div>
         </div>
@@ -675,12 +732,18 @@
             <select id="voiceSelect"><option>Loading voices...</option></select>
           </div>
           <div class="toggle-row">
-            <span>Auto-listen after response</span>
-            <div class="toggle on" id="toggleAutoListen" role="switch" aria-checked="true"></div>
+            <span>Speak responses aloud</span>
+            <div class="toggle on" id="toggleSpeak" role="switch" aria-checked="true"></div>
           </div>
-          <div class="toggle-row">
-            <span>Continuous listening</span>
-            <div class="toggle" id="toggleContinuous" role="switch" aria-checked="false"></div>
+          <div class="mic-settings">
+            <div class="toggle-row">
+              <span>Auto-listen after response</span>
+              <div class="toggle" id="toggleAutoListen" role="switch" aria-checked="false"></div>
+            </div>
+            <div class="toggle-row">
+              <span>Continuous listening</span>
+              <div class="toggle" id="toggleContinuous" role="switch" aria-checked="false"></div>
+            </div>
           </div>
         </div>
       </aside>
@@ -695,7 +758,7 @@
           <line x1="8" y1="23" x2="16" y2="23"/>
         </svg>
       </button>
-      <input type="text" class="text-input" id="textInput" placeholder="Type a message to JARVIS..." autocomplete="off">
+      <input type="text" class="text-input" id="textInput" placeholder="Type here and press Enter to talk to JARVIS..." autocomplete="off" autofocus>
       <button class="send-btn" id="sendBtn">TRANSMIT</button>
     </footer>
   </div>
@@ -706,15 +769,17 @@
       listening: false,
       speaking: false,
       processing: false,
-      autoListen: true,
+      micAvailable: false,
+      speakResponses: true,
+      autoListen: false,
       continuous: false,
       conversationCount: 0,
       history: [],
       selectedVoice: null,
       apiKey: localStorage.getItem('jarvis_api_key') || '',
-      audioContext: null,
-      analyser: null,
       animFrame: null,
+      speechUnlocked: false,
+      isEdge: /Edg\//.test(navigator.userAgent),
     };
 
     // ─── DOM refs ────────────────────────────────────────────
@@ -728,6 +793,9 @@
     const clock = $('clock');
     const orbCore = $('orbCore');
     const orbLabel = $('orbLabel');
+    const orbHint = $('orbHint');
+    const modeBadge = $('modeBadge');
+    const quickPrompts = $('quickPrompts');
     const transcript = $('transcript');
     const micBtn = $('micBtn');
     const textInput = $('textInput');
@@ -736,9 +804,11 @@
     const voiceSelect = $('voiceSelect');
     const toggleAutoListen = $('toggleAutoListen');
     const toggleContinuous = $('toggleContinuous');
+    const toggleSpeak = $('toggleSpeak');
     const sysAiMode = $('sysAiMode');
     const sysConvCount = $('sysConvCount');
     const sysSpeech = $('sysSpeech');
+    const sysInput = $('sysInput');
     const canvas = $('visualizer');
     const ctx = canvas.getContext('2d');
 
@@ -759,7 +829,57 @@
       }
       await new Promise((r) => setTimeout(r, 400));
       bootOverlay.classList.add('hidden');
-      speak("Good evening. JARVIS systems are online and ready to assist you.");
+      addMessage('jarvis', 'Good evening. JARVIS systems are online. Type a message below to begin — no microphone required.');
+      textInput.focus();
+    }
+
+    function enableTextOnlyMode() {
+      state.micAvailable = false;
+      document.body.classList.add('text-only');
+      micBtn.classList.add('hidden');
+      orbCore.classList.add('text-focus');
+      orbCore.title = 'Click to focus text input';
+      orbHint.textContent = 'Type a message below and press Enter — no mic needed';
+      modeBadge.textContent = 'TEXT INPUT MODE';
+      sysInput.textContent = 'TEXT';
+      state.autoListen = false;
+      toggleAutoListen.classList.remove('on');
+      toggleAutoListen.setAttribute('aria-checked', 'false');
+    }
+
+    function enableMicMode() {
+      state.micAvailable = true;
+      document.body.classList.remove('text-only');
+      micBtn.classList.remove('hidden');
+      orbCore.classList.remove('text-focus');
+      orbCore.title = 'Click to talk';
+      orbHint.textContent = 'Type below, or click the orb / mic button to speak';
+      modeBadge.textContent = 'TEXT + VOICE MODE';
+      sysInput.textContent = 'TEXT + MIC';
+    }
+
+    async function detectMicrophone() {
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const mics = devices.filter((d) => d.kind === 'audioinput');
+        const hasRealMic = mics.some((d) => d.label && d.deviceId);
+        if (hasRealMic) enableMicMode();
+      } catch {
+        // Stay in text-only mode
+      }
+    }
+
+    function unlockSpeech() {
+      if (state.speechUnlocked) return;
+      state.speechUnlocked = true;
+      populateVoices();
+      if (state.isEdge) {
+        window.speechSynthesis.resume();
+        setTimeout(populateVoices, 300);
+        setTimeout(populateVoices, 1000);
+      }
     }
 
     // ─── Clock ───────────────────────────────────────────────
@@ -798,8 +918,9 @@
         console.warn('Speech error:', e.error);
         state.listening = false;
         updateUI();
-        if (e.error === 'not-allowed') {
-          addMessage('jarvis', 'Microphone access was denied. Please allow microphone permissions and try again.');
+        if (e.error === 'not-allowed' || e.error === 'audio-capture' || e.error === 'service-not-allowed') {
+          enableTextOnlyMode();
+          addMessage('jarvis', 'No microphone detected or access denied. Switched to text input — just type your messages below.');
         }
       };
 
@@ -818,12 +939,11 @@
         }
       };
     } else {
-      sysSpeech.textContent = 'UNSUPPORTED';
-      sysSpeech.style.color = 'var(--red)';
+      enableTextOnlyMode();
     }
 
     function startListening() {
-      if (!recognition || state.listening || state.speaking || state.processing) return;
+      if (!state.micAvailable || !recognition || state.listening || state.speaking || state.processing) return;
       try {
         recognition.start();
       } catch (e) {
@@ -836,46 +956,84 @@
       recognition.stop();
     }
 
-    // ─── Speech Synthesis ────────────────────────────────────
+    // ─── Speech Synthesis (Edge-compatible) ──────────────────
     function getVoices() {
-      return speechSynthesis.getVoices();
+      return window.speechSynthesis.getVoices();
+    }
+
+    function pickJarvisVoice(voices) {
+      const en = voices.filter((v) => v.lang.startsWith('en'));
+      const list = en.length ? en : voices;
+      const edgePreferred = [
+        'Microsoft George',
+        'Microsoft Hazel',
+        'Microsoft Ryan',
+        'Microsoft Libby',
+        'Google UK English Male',
+        'Daniel',
+        'UK English',
+        'British',
+      ];
+      for (const name of edgePreferred) {
+        const match = list.find((v) => v.name.includes(name));
+        if (match) return match;
+      }
+      const gb = list.find((v) => v.lang.startsWith('en-GB'));
+      return gb || list[0] || null;
     }
 
     function populateVoices() {
       const voices = getVoices();
+      if (!voices.length) return;
+
       voiceSelect.innerHTML = '';
-      const preferred = voices.filter((v) => v.lang.startsWith('en-GB') || v.lang.startsWith('en'));
-      const list = preferred.length ? preferred : voices;
+      const en = voices.filter((v) => v.lang.startsWith('en-GB') || v.lang.startsWith('en'));
+      const list = en.length ? en : voices;
+
       list.forEach((v, i) => {
         const opt = document.createElement('option');
         opt.value = i;
         opt.textContent = `${v.name} (${v.lang})`;
-        if (v.name.includes('Daniel') || v.name.includes('UK') || v.name.includes('British')) {
-          opt.selected = true;
-          state.selectedVoice = v;
-        }
         voiceSelect.appendChild(opt);
       });
-      if (!state.selectedVoice && list.length) state.selectedVoice = list[0];
+
+      state.selectedVoice = pickJarvisVoice(list);
+      if (state.selectedVoice) {
+        const idx = list.indexOf(state.selectedVoice);
+        if (idx >= 0) voiceSelect.value = idx;
+      }
+
+      sysSpeech.textContent = list.length ? 'READY' : 'LOADING';
+      sysSpeech.style.color = '';
     }
 
     speechSynthesis.onvoiceschanged = populateVoices;
     populateVoices();
+    setTimeout(populateVoices, 250);
+    setTimeout(populateVoices, 1000);
 
     voiceSelect.addEventListener('change', () => {
-      const voices = getVoices().filter((v) => v.lang.startsWith('en-GB') || v.lang.startsWith('en'));
-      const list = voices.length ? voices : getVoices();
-      state.selectedVoice = list[parseInt(voiceSelect.value, 10)];
+      const en = getVoices().filter((v) => v.lang.startsWith('en-GB') || v.lang.startsWith('en'));
+      const list = en.length ? en : getVoices();
+      state.selectedVoice = list[parseInt(voiceSelect.value, 10)] || null;
     });
 
     function speak(text) {
+      if (!state.speakResponses || !window.speechSynthesis) {
+        return Promise.resolve();
+      }
+
       return new Promise((resolve) => {
-        speechSynthesis.cancel();
+        unlockSpeech();
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+
         const utter = new SpeechSynthesisUtterance(text);
         if (state.selectedVoice) utter.voice = state.selectedVoice;
         utter.rate = 0.95;
         utter.pitch = 0.9;
         utter.volume = 1;
+        utter.lang = 'en-GB';
 
         utter.onstart = () => {
           state.speaking = true;
@@ -887,7 +1045,7 @@
           updateUI();
           stopVisualizer();
           resolve();
-          if (state.autoListen && !state.continuous) {
+          if (state.micAvailable && state.autoListen && !state.continuous) {
             setTimeout(() => startListening(), 500);
           }
         };
@@ -898,7 +1056,12 @@
           resolve();
         };
 
-        speechSynthesis.speak(utter);
+        window.speechSynthesis.speak(utter);
+
+        // Edge sometimes needs a resume nudge mid-queue
+        if (state.isEdge) {
+          setTimeout(() => window.speechSynthesis.resume(), 50);
+        }
       });
     }
 
@@ -965,7 +1128,7 @@
         orbCore.classList.add('active');
         orbCore.classList.remove('speaking');
         orbLabel.textContent = 'LISTENING...';
-        micBtn.classList.add('active');
+        if (state.micAvailable) micBtn.classList.add('active');
       } else if (state.speaking) {
         statusDot.classList.add('speaking');
         statusLabel.textContent = 'SPEAKING';
@@ -973,19 +1136,19 @@
         orbCore.classList.remove('active');
         orbCore.classList.add('speaking');
         orbLabel.textContent = 'SPEAKING...';
-        micBtn.classList.remove('active');
+        if (state.micAvailable) micBtn.classList.remove('active');
       } else if (state.processing) {
         statusLabel.textContent = 'PROCESSING';
         voiceStatus.textContent = 'THINKING';
         orbCore.classList.remove('active', 'speaking');
         orbLabel.textContent = 'PROCESSING...';
-        micBtn.classList.remove('active');
+        if (state.micAvailable) micBtn.classList.remove('active');
       } else {
         statusLabel.textContent = 'ONLINE';
-        voiceStatus.textContent = 'READY';
+        voiceStatus.textContent = state.speakResponses ? 'READY' : 'MUTED';
         orbCore.classList.remove('active', 'speaking');
         orbLabel.textContent = 'STANDBY';
-        micBtn.classList.remove('active');
+        if (state.micAvailable) micBtn.classList.remove('active');
       }
     }
 
@@ -1091,8 +1254,8 @@
           "The suit is impressive, but it's the mind inside that truly matters, sir.",
         ],
         help: [
-          "I can answer questions, tell you the time and date, have a conversation, or assist with general inquiries. For full capabilities, add an OpenAI API key in the configuration panel.",
-          "I'm running in demo mode. I can chat, tell jokes, and provide basic info. For advanced AI, enter your OpenAI API key in settings.",
+          "Type your questions in the box below and press Enter. I can answer questions, tell you the time and date, have a conversation, and more. For full capabilities, add an OpenAI API key in the configuration panel.",
+          "No microphone needed — just type to chat. I can tell jokes, give the time, and hold a conversation. For advanced AI, enter your OpenAI API key in settings.",
         ],
       };
 
@@ -1137,7 +1300,9 @@
     async function handleUserMessage(text) {
       if (!text || state.processing) return;
 
+      unlockSpeech();
       stopListening();
+      quickPrompts.style.display = 'none';
       state.processing = true;
       updateUI();
       addMessage('user', text);
@@ -1149,20 +1314,32 @@
       updateUI();
       addMessage('jarvis', reply);
       await speak(reply);
+      textInput.focus();
     }
 
     // ─── Event listeners ─────────────────────────────────────
     orbCore.addEventListener('click', () => {
+      unlockSpeech();
+      if (!state.micAvailable) {
+        textInput.focus();
+        return;
+      }
       if (state.listening) stopListening();
       else startListening();
     });
 
     micBtn.addEventListener('click', () => {
+      unlockSpeech();
+      if (!state.micAvailable) {
+        textInput.focus();
+        return;
+      }
       if (state.listening) stopListening();
       else startListening();
     });
 
     sendBtn.addEventListener('click', () => {
+      unlockSpeech();
       const text = textInput.value.trim();
       if (text) {
         textInput.value = '';
@@ -1171,7 +1348,19 @@
     });
 
     textInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendBtn.click();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
+
+    textInput.addEventListener('focus', unlockSpeech);
+
+    quickPrompts.addEventListener('click', (e) => {
+      const btn = e.target.closest('.quick-prompt');
+      if (!btn) return;
+      unlockSpeech();
+      handleUserMessage(btn.textContent.trim());
     });
 
     apiKeyInput.value = state.apiKey;
@@ -1182,13 +1371,22 @@
     });
     sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'DEMO';
 
+    toggleSpeak.addEventListener('click', () => {
+      state.speakResponses = !state.speakResponses;
+      toggleSpeak.classList.toggle('on', state.speakResponses);
+      toggleSpeak.setAttribute('aria-checked', state.speakResponses);
+      sysSpeech.textContent = state.speakResponses ? 'READY' : 'MUTED';
+    });
+
     toggleAutoListen.addEventListener('click', () => {
+      if (!state.micAvailable) return;
       state.autoListen = !state.autoListen;
       toggleAutoListen.classList.toggle('on', state.autoListen);
       toggleAutoListen.setAttribute('aria-checked', state.autoListen);
     });
 
     toggleContinuous.addEventListener('click', () => {
+      if (!state.micAvailable) return;
       state.continuous = !state.continuous;
       toggleContinuous.classList.toggle('on', state.continuous);
       toggleContinuous.setAttribute('aria-checked', state.continuous);
@@ -1197,6 +1395,8 @@
     });
 
     // ─── Init ────────────────────────────────────────────────
+    enableTextOnlyMode();
+    detectMicrophone();
     bootSequence();
   </script>
 </body>
