@@ -749,9 +749,14 @@
         <div class="panel" style="flex:1; overflow-y:auto;">
           <div class="panel-title">CONFIGURATION</div>
           <div class="settings-group">
-            <label>OpenAI API Key (optional — even smarter replies)</label>
-            <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+            <label>Gemini API Key (Gemini 2.0 Flash — full AI)</label>
+            <input type="password" id="geminiApiKey" placeholder="AIza..." autocomplete="off">
           </div>
+          <div class="settings-group">
+            <label>OpenAI API Key (optional alternative)</label>
+            <input type="password" id="openaiApiKey" placeholder="sk-..." autocomplete="off">
+          </div>
+          <p class="settings-note">Your key is saved only in this browser. Gemini powers full conversation on any topic.</p>
           <div class="settings-group">
             <label>Voice</label>
             <select id="voiceSelect"><option>Loading voices...</option></select>
@@ -807,7 +812,8 @@
       conversationCount: 0,
       history: [],
       selectedVoice: null,
-      apiKey: localStorage.getItem('jarvis_api_key') || '',
+      geminiApiKey: localStorage.getItem('jarvis_gemini_api_key') || '',
+      openaiApiKey: localStorage.getItem('jarvis_openai_api_key') || localStorage.getItem('jarvis_api_key') || '',
       animFrame: null,
       speechUnlocked: false,
       isEdge: /Edg\//.test(navigator.userAgent),
@@ -831,7 +837,8 @@
     const micBtn = $('micBtn');
     const textInput = $('textInput');
     const sendBtn = $('sendBtn');
-    const apiKeyInput = $('apiKey');
+    const geminiApiKeyInput = $('geminiApiKey');
+    const openaiApiKeyInput = $('openaiApiKey');
     const voiceSelect = $('voiceSelect');
     const toggleAutoListen = $('toggleAutoListen');
     const toggleContinuous = $('toggleContinuous');
@@ -1221,8 +1228,72 @@
       return d.innerHTML;
     }
 
-    // ─── AI Brain (free knowledge — no API key needed) ───────
+    // ─── AI Brain ────────────────────────────────────────────
     const WIKI_API = 'https://en.wikipedia.org/w/api.php';
+    const GEMINI_MODEL = 'gemini-2.0-flash';
+    const JARVIS_PROMPT = `You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), Tony Stark's AI assistant from Iron Man. You are sophisticated, witty, and speak with a refined British tone. Keep responses concise (1-3 sentences) since they will be spoken aloud. You are helpful, occasionally dry-humored, and refer to the user as "sir" or "ma'am" unless told otherwise.`;
+
+    function updateAiModeLabel() {
+      if (state.geminiApiKey) sysAiMode.textContent = 'GEMINI';
+      else if (state.openaiApiKey) sysAiMode.textContent = 'OPENAI';
+      else sysAiMode.textContent = 'KNOWLEDGE';
+    }
+
+    function buildGeminiContents(history) {
+      return history.slice(-10).map((msg) => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      }));
+    }
+
+    async function getGeminiResponse(userMessage) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(state.geminiApiKey)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: JARVIS_PROMPT }] },
+          contents: buildGeminiContents(state.history),
+          generationConfig: {
+            maxOutputTokens: 250,
+            temperature: 0.8,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `Gemini API error ${res.status}`);
+      }
+
+      const data = await res.json();
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!reply) throw new Error('Empty response from Gemini');
+      return reply.trim();
+    }
+
+    async function getOpenAIResponse() {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.openaiApiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: JARVIS_PROMPT },
+            ...state.history.slice(-10),
+          ],
+          max_tokens: 200,
+          temperature: 0.8,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`OpenAI API error ${res.status}`);
+      const data = await res.json();
+      return data.choices[0].message.content;
+    }
 
     function trimForSpeech(text, max = 420) {
       const clean = text.replace(/\s+/g, ' ').trim();
@@ -1384,10 +1455,6 @@
       const dictWord = extractDictionaryWord(msg);
       if (dictWord) return { lookup: 'dictionary', word: dictWord };
 
-      if (/weather|temperature|forecast/.test(lower)) {
-        return { lookup: 'weather', query: extractSearchQuery(msg) };
-      }
-
       return null;
     }
 
@@ -1426,31 +1493,22 @@
     async function getAIResponse(userMessage) {
       state.history.push({ role: 'user', content: userMessage });
 
-      if (state.apiKey) {
+      if (state.geminiApiKey) {
         try {
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${state.apiKey}`,
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'system',
-                  content: `You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), Tony Stark's AI assistant from Iron Man. You are sophisticated, witty, and speak with a refined British tone. Keep responses concise (1-3 sentences) since they will be spoken aloud. You are helpful, occasionally dry-humored, and refer to the user as "sir" or "ma'am" unless told otherwise.`,
-                },
-                ...state.history.slice(-10),
-              ],
-              max_tokens: 200,
-              temperature: 0.8,
-            }),
-          });
+          const reply = await getGeminiResponse(userMessage);
+          state.history.push({ role: 'assistant', content: reply });
+          return reply;
+        } catch (err) {
+          console.error('Gemini error:', err);
+          const reply = await getFreeKnowledgeResponse(userMessage, true);
+          state.history.push({ role: 'assistant', content: reply });
+          return reply;
+        }
+      }
 
-          if (!res.ok) throw new Error(`API error ${res.status}`);
-          const data = await res.json();
-          const reply = data.choices[0].message.content;
+      if (state.openaiApiKey) {
+        try {
+          const reply = await getOpenAIResponse();
           state.history.push({ role: 'assistant', content: reply });
           return reply;
         } catch (err) {
@@ -1537,13 +1595,22 @@
       handleUserMessage(btn.textContent.trim());
     });
 
-    apiKeyInput.value = state.apiKey;
-    apiKeyInput.addEventListener('change', () => {
-      state.apiKey = apiKeyInput.value.trim();
-      localStorage.setItem('jarvis_api_key', state.apiKey);
-      sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'KNOWLEDGE';
+    geminiApiKeyInput.value = state.geminiApiKey;
+    openaiApiKeyInput.value = state.openaiApiKey;
+
+    geminiApiKeyInput.addEventListener('change', () => {
+      state.geminiApiKey = geminiApiKeyInput.value.trim();
+      localStorage.setItem('jarvis_gemini_api_key', state.geminiApiKey);
+      updateAiModeLabel();
     });
-    sysAiMode.textContent = state.apiKey ? 'OPENAI' : 'KNOWLEDGE';
+
+    openaiApiKeyInput.addEventListener('change', () => {
+      state.openaiApiKey = openaiApiKeyInput.value.trim();
+      localStorage.setItem('jarvis_openai_api_key', state.openaiApiKey);
+      updateAiModeLabel();
+    });
+
+    updateAiModeLabel();
 
     toggleSpeak.addEventListener('click', () => {
       state.speakResponses = !state.speakResponses;
