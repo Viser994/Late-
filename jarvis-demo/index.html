@@ -1358,12 +1358,14 @@
         geminiStatus.style.color = 'var(--red)';
       }
     }
+
+    function updateAiModeLabel() {
       if (state.geminiApiKey) sysAiMode.textContent = 'GEMINI';
       else if (state.openaiApiKey) sysAiMode.textContent = 'OPENAI';
       else sysAiMode.textContent = 'KNOWLEDGE';
     }
 
-    function updateAiModeLabel() {
+    async function getOpenAIResponse() {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
