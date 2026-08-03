@@ -806,3 +806,143 @@
 #app:has(.onboarding) .tab-bar {
   display: none;
 }
+
+/* ── Install guide & banner ───────────────────────── */
+
+.install-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem;
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.install-card--done {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.install-card__body { flex: 1; }
+
+.install-card__title {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.install-card__desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.1rem;
+}
+
+.install-guide {
+  text-align: center;
+}
+
+.install-guide__logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.install-guide__lead {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.install-guide__steps {
+  text-align: left;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.install-guide__steps li {
+  margin-bottom: 0.75rem;
+}
+
+.install-guide__share {
+  background: var(--bg-input);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.install-guide__tip {
+  font-size: 0.8rem;
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.install-guide__url {
+  font-family: monospace;
+  font-size: 0.8rem;
+  background: var(--bg-input);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.install-guide__features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.install-guide__feature {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-success);
+  text-align: left;
+}
+
+.install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+}
+
+.install-banner__text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  text-align: left;
+}
+
+.install-banner__text strong {
+  color: var(--color-primary);
+  display: block;
+}
+
+.install-banner__btn {
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+

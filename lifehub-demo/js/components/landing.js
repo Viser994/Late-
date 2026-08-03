@@ -3,6 +3,7 @@
  */
 
 import { logoFull } from "./logo.js";
+import { renderInstallBanner, bindInstallBanner } from "./installGuide.js";
 
 export function renderLanding(container, { onGetStarted, onSignIn }) {
   container.innerHTML = `
@@ -171,6 +172,7 @@ export function renderLanding(container, { onGetStarted, onSignIn }) {
       </section>
 
       <footer class="landing-footer">
+        ${renderInstallBanner()}
         ${logoFull({ size: 28, showText: true })}
         <p>© 2026 LifeHub. Personal life admin, reimagined.</p>
       </footer>
@@ -178,6 +180,7 @@ export function renderLanding(container, { onGetStarted, onSignIn }) {
   `;
 
   bindLandingEvents(container, { onGetStarted, onSignIn });
+  bindInstallBanner(container);
   initScrollAnimations(container);
 }
 

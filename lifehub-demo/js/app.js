@@ -13,6 +13,7 @@ import { renderTodayTab, showAddTaskModal } from "./components/todayTab.js";
 import { renderDocumentsTab } from "./components/documentsTab.js";
 import { renderSettingsTab, applyTheme } from "./components/settingsTab.js";
 import { icon } from "./components/icons.js";
+import { registerServiceWorker, initInstallPrompt } from "./services/pwaService.js";
 
 let state = loadState();
 let activeTab = "home";
@@ -27,6 +28,8 @@ const TABS = [
 
 function init() {
   applyTheme(state.settings.darkMode);
+  registerServiceWorker();
+  initInstallPrompt();
   routeToScreen();
 }
 

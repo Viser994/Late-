@@ -6,6 +6,7 @@ import { escapeHtml, showToast } from "../utils/helpers.js";
 import { saveSettings, resetAllData, loadState } from "../services/storageService.js";
 import { sendTestNotification, requestPermission } from "../services/notificationService.js";
 import { renderConnectedAppsSettings, bindConnectedAppsSettings } from "./appLinks.js";
+import { renderInstallSection, bindInstallButton } from "./installGuide.js";
 
 /** Render the Settings tab */
 export function renderSettingsTab(container, state, { onUpdate, onReset }) {
@@ -81,6 +82,8 @@ export function renderSettingsTab(container, state, { onUpdate, onReset }) {
 
       ${renderConnectedAppsSettings(settings)}
 
+      ${renderInstallSection()}
+
       <div class="settings-group">
         <div class="settings-group__title">Data</div>
         <div class="settings-list">
@@ -149,6 +152,9 @@ export function renderSettingsTab(container, state, { onUpdate, onReset }) {
 
   // Connected apps toggles
   bindConnectedAppsSettings(container, state, onUpdate);
+
+  // Install app
+  bindInstallButton(container);
 
   // Reset data
   container.querySelector("#reset-data").addEventListener("click", () => {

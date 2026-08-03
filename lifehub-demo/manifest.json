@@ -1,0 +1,27 @@
+{
+  "name": "LifeHub — Personal Life Admin",
+  "short_name": "LifeHub",
+  "description": "Organize bills, reminders, documents, and deadlines in one place.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f9fc",
+  "theme_color": "#4f6ef7",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "prefer_related_applications": false
+}
