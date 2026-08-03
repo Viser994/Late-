@@ -1,9 +1,12 @@
 /**
  * LifeHub — main application entry point.
+ * Flow: Landing → Login → Onboarding → App
  */
 
 import { loadState, saveSettings } from "./services/storageService.js";
 import { checkAndNotify, showInAppReminders } from "./services/notificationService.js";
+import { renderLanding } from "./components/landing.js";
+import { renderLogin } from "./components/login.js";
 import { renderOnboarding } from "./components/onboarding.js";
 import { renderHomeTab } from "./components/homeTab.js";
 import { renderTodayTab, showAddTaskModal } from "./components/todayTab.js";
@@ -24,12 +27,51 @@ const TABS = [
 
 function init() {
   applyTheme(state.settings.darkMode);
+  routeToScreen();
+}
 
-  if (!state.settings.onboardingComplete) {
-    renderOnboarding(appEl, { onComplete: finishOnboarding });
-  } else {
-    renderApp();
+/** Route user to the correct screen based on progress */
+function routeToScreen() {
+  const { settings } = state;
+
+  if (!settings.landingComplete) {
+    renderLanding(appEl, {
+      onGetStarted: completeLanding,
+      onSignIn: () => {
+        completeLanding();
+      },
+    });
+    return;
   }
+
+  if (!settings.loggedIn) {
+    renderLogin(appEl, {
+      userName: settings.userName,
+      onLogin: handleLogin,
+    });
+    return;
+  }
+
+  if (!settings.onboardingComplete) {
+    renderOnboarding(appEl, { onComplete: finishOnboarding });
+    return;
+  }
+
+  renderApp();
+}
+
+function completeLanding() {
+  state.settings.landingComplete = true;
+  saveSettings(state.settings);
+  routeToScreen();
+}
+
+function handleLogin({ userName, userEmail }) {
+  state.settings.loggedIn = true;
+  state.settings.userName = userName;
+  state.settings.userEmail = userEmail || "";
+  saveSettings(state.settings);
+  routeToScreen();
 }
 
 function finishOnboarding() {
@@ -116,7 +158,7 @@ function handleUpdate(newState) {
 function handleReset(freshState) {
   state = freshState;
   activeTab = "home";
-  renderApp();
+  routeToScreen();
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -3,10 +3,11 @@
  */
 
 import { escapeHtml } from "../utils/helpers.js";
+import { logoHero } from "./logo.js";
 
 const SLIDES = [
   {
-    visual: "🏠",
+    useLogo: true,
     title: "Welcome to LifeHub",
     text: "The only app that unifies your bills, documents, and deadlines into one intelligent command center.",
     feature: "Your life, organized",
@@ -43,7 +44,7 @@ export function renderOnboarding(container, { onComplete }) {
     container.innerHTML = `
       <div class="onboarding">
         <div class="onboarding__slides">
-          <div class="onboarding__visual">${slide.visual}</div>
+          ${slide.useLogo ? `<div class="onboarding__logo-wrap">${logoHero({ size: 90 })}</div>` : `<div class="onboarding__visual">${slide.visual}</div>`}
           <span class="onboarding__feature">${escapeHtml(slide.feature)}</span>
           <h1 class="onboarding__title">${escapeHtml(slide.title)}</h1>
           <p class="onboarding__text">${escapeHtml(slide.text)}</p>

@@ -7,6 +7,7 @@ import { escapeHtml, showToast } from "../utils/helpers.js";
 import { calculateLifePulse, buildLifeStream } from "../utils/lifeScore.js";
 import { generateClarityBrief } from "../services/clarityService.js";
 import { icon, lifePulseRing } from "./icons.js";
+import { logoMark } from "./logo.js";
 import { showAddTaskModal } from "./todayTab.js";
 
 /** Render the Home tab */
@@ -39,7 +40,7 @@ function renderHomeShell(firstName, pulse, stream, brief, docCount) {
       <div class="home-hero">
         <div class="home-hero__top">
           <div class="home-hero__brand">
-            <div class="home-hero__logo">LH</div>
+            <div class="home-hero__logo">${logoMark({ size: 32, color: "white" })}</div>
             <span class="home-hero__name">LifeHub</span>
           </div>
           <button class="home-hero__notif" id="home-notif" aria-label="Notifications">

@@ -203,8 +203,11 @@ export const DUMMY_DOCUMENTS = [
 export const DEFAULT_SETTINGS = {
   darkMode: false,
   notifications: true,
+  landingComplete: false,
+  loggedIn: false,
   onboardingComplete: false,
   userName: "",
+  userEmail: "",
 };
 
 /** Helper: ISO date string N days from today */

@@ -189,6 +189,23 @@ img, svg {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.onboarding__logo-wrap {
+  margin-bottom: 0.5rem;
+}
+
+.onboarding__logo-wrap .logo-hero {
+  width: 110px;
+  height: 110px;
+}
+
+.onboarding__logo-wrap .logo-hero__glow {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+}
+
+.onboarding .logo-mark path {
+  stroke: white;
+}
+
 /* ── Buttons ────────────────────────────────────────── */
 
 .btn {
