@@ -1,0 +1,7 @@
+# Core runtime dependencies for the TSX Stock Scanner.
+# The GUI uses Tkinter, which ships with the standard CPython installer on
+# Windows and macOS. On Debian/Ubuntu install it with: sudo apt install python3-tk
+
+requests>=2.31.0
+yfinance>=0.2.40
+pandas>=2.0.0
