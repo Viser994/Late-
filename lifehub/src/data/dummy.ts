@@ -1,0 +1,263 @@
+import { Task, StoredDocument } from '../types';
+
+const now = new Date();
+const d = (offsetDays: number) =>
+  new Date(now.getTime() + offsetDays * 24 * 60 * 60 * 1000).toISOString();
+
+// ─── Dummy Tasks ─────────────────────────────────────────────────────────────
+
+export const DUMMY_TASKS: Task[] = [
+  {
+    id: 'task-1',
+    title: 'Pay electricity bill',
+    description: 'Monthly bill due — account #4821-XX',
+    type: 'bill',
+    priority: 'urgent',
+    status: 'pending',
+    dueDate: d(1),
+    amount: 142.50,
+    currency: 'USD',
+    tags: ['utilities', 'monthly'],
+    createdAt: d(-5),
+    updatedAt: d(-5),
+  },
+  {
+    id: 'task-2',
+    title: 'Dentist appointment',
+    description: 'Annual checkup at City Dental Clinic — Dr. Patel',
+    type: 'appointment',
+    priority: 'high',
+    status: 'pending',
+    dueDate: d(3),
+    tags: ['health'],
+    createdAt: d(-10),
+    updatedAt: d(-10),
+  },
+  {
+    id: 'task-3',
+    title: 'Renew car insurance',
+    description: 'Policy #INS-2024-0077 expires soon',
+    type: 'renewal',
+    priority: 'urgent',
+    status: 'pending',
+    dueDate: d(2),
+    amount: 680,
+    currency: 'USD',
+    tags: ['insurance', 'car'],
+    linkedDocumentId: 'doc-2',
+    createdAt: d(-7),
+    updatedAt: d(-7),
+  },
+  {
+    id: 'task-4',
+    title: 'Internet subscription',
+    description: 'Monthly broadband payment',
+    type: 'bill',
+    priority: 'normal',
+    status: 'pending',
+    dueDate: d(7),
+    amount: 59.99,
+    currency: 'USD',
+    tags: ['utilities'],
+    createdAt: d(-3),
+    updatedAt: d(-3),
+  },
+  {
+    id: 'task-5',
+    title: 'Submit tax documents',
+    description: 'Upload W-2 and schedule appointment with accountant',
+    type: 'task',
+    priority: 'high',
+    status: 'pending',
+    dueDate: d(14),
+    tags: ['tax', 'finance'],
+    linkedDocumentId: 'doc-4',
+    createdAt: d(-2),
+    updatedAt: d(-2),
+  },
+  {
+    id: 'task-6',
+    title: 'Water bill',
+    description: 'Quarterly bill',
+    type: 'bill',
+    priority: 'normal',
+    status: 'completed',
+    dueDate: d(-2),
+    amount: 47.00,
+    currency: 'USD',
+    tags: ['utilities'],
+    createdAt: d(-15),
+    updatedAt: d(-2),
+  },
+  {
+    id: 'task-7',
+    title: 'Gym membership renewal',
+    description: 'Annual membership — FitZone',
+    type: 'renewal',
+    priority: 'low',
+    status: 'pending',
+    dueDate: d(30),
+    amount: 480,
+    currency: 'USD',
+    tags: ['health', 'fitness'],
+    createdAt: d(-1),
+    updatedAt: d(-1),
+  },
+  {
+    id: 'task-8',
+    title: 'Book flight to Chicago',
+    description: 'Conference trip — confirm hotel too',
+    type: 'task',
+    priority: 'normal',
+    status: 'pending',
+    dueDate: d(10),
+    tags: ['travel', 'work'],
+    createdAt: d(-4),
+    updatedAt: d(-4),
+  },
+];
+
+// ─── Dummy Documents ──────────────────────────────────────────────────────────
+
+export const DUMMY_DOCUMENTS: StoredDocument[] = [
+  {
+    id: 'doc-1',
+    name: 'Passport — John Doe',
+    category: 'identity',
+    uri: 'file://dummy/passport.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 204800,
+    aiSummary:
+      'US Passport for John Doe. Valid through August 2030. Issued by the US Department of State.',
+    aiExtractedDates: [
+      { label: 'Issue Date', date: '2020-08-15', confidence: 0.97 },
+      { label: 'Expiry Date', date: '2030-08-14', confidence: 0.99 },
+    ],
+    aiExtractedAmounts: [],
+    aiActionItems: ['Renew before August 2030'],
+    expiryDate: '2030-08-14',
+    tags: ['passport', 'travel', 'id'],
+    createdAt: d(-30),
+    updatedAt: d(-30),
+  },
+  {
+    id: 'doc-2',
+    name: 'Car Insurance — Policy INS-2024',
+    category: 'insurance',
+    uri: 'file://dummy/car_insurance.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 512000,
+    aiSummary:
+      'Comprehensive car insurance with AllSafe Insurance. Policy covers collision, theft, and liability up to $500k. Annual premium $680.',
+    aiExtractedDates: [
+      { label: 'Policy Start', date: '2024-02-01', confidence: 0.95 },
+      { label: 'Policy End', date: new Date(d(2)).toISOString().split('T')[0], confidence: 0.97 },
+    ],
+    aiExtractedAmounts: [
+      { label: 'Annual Premium', amount: 680, currency: 'USD', confidence: 0.98 },
+      { label: 'Deductible', amount: 500, currency: 'USD', confidence: 0.92 },
+    ],
+    aiActionItems: ['Renew or compare quotes before policy expires', 'Update vehicle info if changed'],
+    expiryDate: d(2),
+    tags: ['car', 'insurance'],
+    createdAt: d(-20),
+    updatedAt: d(-20),
+  },
+  {
+    id: 'doc-3',
+    name: 'Samsung TV Warranty',
+    category: 'warranty',
+    uri: 'file://dummy/tv_warranty.jpg',
+    mimeType: 'image/jpeg',
+    sizeBytes: 153600,
+    aiSummary:
+      'Samsung 65" QLED TV (Model QN65Q80C). 2-year manufacturer warranty. Purchase date: Jan 15, 2024. Covers manufacturing defects and panel issues.',
+    aiExtractedDates: [
+      { label: 'Purchase Date', date: '2024-01-15', confidence: 0.99 },
+      { label: 'Warranty Expiry', date: '2026-01-15', confidence: 0.97 },
+    ],
+    aiExtractedAmounts: [
+      { label: 'Purchase Price', amount: 1299, currency: 'USD', confidence: 0.96 },
+    ],
+    aiActionItems: ['Contact Samsung support for repairs before warranty expires'],
+    expiryDate: '2026-01-15',
+    tags: ['tv', 'electronics', 'warranty'],
+    createdAt: d(-60),
+    updatedAt: d(-60),
+  },
+  {
+    id: 'doc-4',
+    name: 'W-2 Form 2024',
+    category: 'finance',
+    uri: 'file://dummy/w2_2024.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 98304,
+    aiSummary:
+      'W-2 Wage and Tax Statement for tax year 2024. Employer: Acme Corp. Wages: $87,500. Federal tax withheld: $14,200.',
+    aiExtractedDates: [
+      { label: 'Tax Year', date: '2024-12-31', confidence: 0.99 },
+    ],
+    aiExtractedAmounts: [
+      { label: 'Gross Wages', amount: 87500, currency: 'USD', confidence: 0.99 },
+      { label: 'Federal Tax Withheld', amount: 14200, currency: 'USD', confidence: 0.97 },
+    ],
+    aiActionItems: ['File federal and state taxes by April 15'],
+    tags: ['tax', 'w2', '2024', 'finance'],
+    createdAt: d(-14),
+    updatedAt: d(-14),
+  },
+  {
+    id: 'doc-5',
+    name: 'Travel Insurance — Chicago Trip',
+    category: 'travel',
+    uri: 'file://dummy/travel_insurance.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 256000,
+    aiSummary:
+      'Travel insurance for Chicago conference trip. Coverage: trip cancellation, medical up to $50k, baggage. Valid March 10–15, 2026.',
+    aiExtractedDates: [
+      { label: 'Trip Start', date: '2026-03-10', confidence: 0.98 },
+      { label: 'Trip End', date: '2026-03-15', confidence: 0.97 },
+    ],
+    aiExtractedAmounts: [
+      { label: 'Medical Coverage', amount: 50000, currency: 'USD', confidence: 0.95 },
+    ],
+    aiActionItems: ['Save emergency hotline number', 'Print copy of policy for travel'],
+    tags: ['travel', 'insurance', 'chicago'],
+    createdAt: d(-5),
+    updatedAt: d(-5),
+  },
+  {
+    id: 'doc-6',
+    name: 'Health Insurance Card',
+    category: 'insurance',
+    uri: 'file://dummy/health_card.jpg',
+    mimeType: 'image/jpeg',
+    sizeBytes: 76800,
+    aiSummary:
+      'BlueCross BlueShield health insurance card. Member ID: XYZ-123456. Group: 9900. PCP copay $20. Specialist copay $40.',
+    aiExtractedDates: [],
+    aiExtractedAmounts: [
+      { label: 'PCP Copay', amount: 20, currency: 'USD', confidence: 0.95 },
+      { label: 'Specialist Copay', amount: 40, currency: 'USD', confidence: 0.95 },
+    ],
+    aiActionItems: ['Keep a photo on phone for quick access'],
+    tags: ['health', 'insurance', 'card'],
+    createdAt: d(-90),
+    updatedAt: d(-90),
+  },
+];
+
+export const DUMMY_USER = {
+  name: 'Alex Johnson',
+  email: 'alex.johnson@email.com',
+};
+
+export const DUMMY_SETTINGS = {
+  theme: 'system' as const,
+  notificationsEnabled: true,
+  reminderLeadHours: 24,
+  defaultCurrency: 'USD',
+  aiProcessingEnabled: true,
+  biometricLock: false,
+};
