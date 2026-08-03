@@ -43,8 +43,8 @@ export function onboardingView(ctx) {
 
     const nameField = isLast
       ? el('div', { class: 'field', style: 'text-align:left;margin-top:8px' }, [
-          el('label', {}, 'What should we call you?'),
-          el('input', { id: 'ob-name', type: 'text', placeholder: 'Your first name', value: ctx.store.state.userName }),
+          el('label', { for: 'ob-name' }, 'What should we call you?'),
+          el('input', { id: 'ob-name', type: 'text', placeholder: 'Your first name', 'aria-label': 'Your first name', value: ctx.store.state.userName }),
         ])
       : null;
 
@@ -60,14 +60,16 @@ export function onboardingView(ctx) {
     const secondary = isLast ? null : el('button', { class: 'btn ghost block',
       onclick: () => { ctx.store.completeOnboarding(); ctx.navigate('today'); } }, 'Skip');
 
-    root.replaceChildren(
+    // Filter out null slots (e.g. the name field only exists on the last step)
+    // because replaceChildren would otherwise stringify them to the text "null".
+    root.replaceChildren(...[
       art,
       el('h1', {}, s.title),
       el('p', {}, s.body),
       nameField,
       dots,
-      el('div', { class: 'onboard-actions' }, [primary, secondary]),
-    );
+      el('div', { class: 'onboard-actions' }, [primary, secondary].filter(Boolean)),
+    ].filter(Boolean));
   }
 
   render();

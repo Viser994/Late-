@@ -214,13 +214,15 @@ a { color: var(--brand-500); }
 }
 .task.done .task-title { text-decoration: line-through; color: var(--text-faint); }
 .check {
-  flex-shrink: 0; width: 24px; height: 24px; margin-top: 2px;
-  border-radius: var(--r-full); border: 2px solid var(--border);
-  background: var(--surface); display: grid; place-items: center;
-  transition: all 0.15s ease; color: transparent;
+  flex-shrink: 0; width: 26px; height: 26px; margin-top: 1px;
+  border-radius: var(--r-full); border: 2px solid var(--text-faint);
+  background: var(--surface-muted); display: grid; place-items: center;
+  transition: all 0.15s ease; color: var(--text-faint);
 }
-.check:hover { border-color: var(--brand-500); }
+.check svg { width: 15px; height: 15px; opacity: 0.55; }
+.check:hover { border-color: var(--brand-500); color: var(--brand-500); }
 .check.checked { background: var(--success-500); border-color: var(--success-500); color: #fff; }
+.check.checked svg { opacity: 1; }
 .task-body { flex: 1; min-width: 0; }
 .task-title { font-weight: 600; font-size: 0.98rem; }
 .task-meta { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 6px; align-items: center; }

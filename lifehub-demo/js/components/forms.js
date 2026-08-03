@@ -40,10 +40,10 @@ export function addTaskSheet(ctx) {
         },
       }, info.label)));
 
-  const titleInput = el('input', { type: 'text', placeholder: 'e.g. Water bill', required: 'true' });
-  const dateInput = el('input', { type: 'date', value: isoDaysFromNow(3) });
-  const amountInput = el('input', { type: 'number', placeholder: '0.00', step: '0.01', min: '0' });
-  const noteInput = el('textarea', { placeholder: 'Add a note (optional)' });
+  const titleInput = el('input', { type: 'text', placeholder: 'e.g. Water bill', required: 'true', 'aria-label': 'Task title' });
+  const dateInput = el('input', { type: 'date', value: isoDaysFromNow(3), 'aria-label': 'Due date' });
+  const amountInput = el('input', { type: 'number', placeholder: '0.00', step: '0.01', min: '0', 'aria-label': 'Amount' });
+  const noteInput = el('textarea', { placeholder: 'Add a note (optional)', 'aria-label': 'Note' });
 
   const form = el('form', {
     onsubmit: (e) => {
@@ -80,9 +80,10 @@ export function addDocumentSheet(ctx) {
   let category = 'receipt';
   let pickedFileName = '';
 
-  const nameInput = el('input', { type: 'text', placeholder: 'e.g. Car insurance card' });
+  const nameInput = el('input', { type: 'text', placeholder: 'e.g. Car insurance card', 'aria-label': 'Document name' });
 
   const categorySelect = el('select', {
+    'aria-label': 'Document category',
     onchange: (e) => { category = e.target.value; },
   }, Object.entries(DOC_CATEGORIES).map(([key, info]) =>
     el('option', { value: key, selected: key === category ? 'true' : null }, info.label)));

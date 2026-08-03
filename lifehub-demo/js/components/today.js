@@ -111,7 +111,7 @@ function section(title, list, ctx, count) {
  * Showcases the "summarize long documents or emails" feature on the dashboard.
  */
 function smartSummaryCard(ctx) {
-  const textarea = el('textarea', { placeholder: 'Paste an email or long message…', style: 'min-height:70px' }, sampleEmail);
+  const textarea = el('textarea', { placeholder: 'Paste an email or long message…', 'aria-label': 'Message to summarize', style: 'min-height:70px' }, sampleEmail);
   const output = el('div', {});
 
   const runBtn = el('button', { class: 'btn sm', style: 'margin-top:10px',
