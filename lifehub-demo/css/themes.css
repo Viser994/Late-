@@ -1,0 +1,69 @@
+/* LifeHub theme tokens — light & dark mode */
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Brand */
+  --color-primary: #4f6ef7;
+  --color-primary-soft: rgba(79, 110, 247, 0.12);
+  --color-primary-hover: #3d5ce0;
+
+  /* Semantic */
+  --color-success: #22c55e;
+  --color-success-soft: rgba(34, 197, 94, 0.12);
+  --color-warning: #f59e0b;
+  --color-warning-soft: rgba(245, 158, 11, 0.12);
+  --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.12);
+  --color-info: #06b6d4;
+  --color-info-soft: rgba(6, 182, 212, 0.12);
+
+  /* Light theme surfaces */
+  --bg-app: #f4f6fb;
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #f0f2f8;
+  --bg-tab-bar: rgba(255, 255, 255, 0.92);
+
+  --text-primary: #1a1d26;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --text-inverse: #ffffff;
+
+  --border-color: rgba(26, 29, 38, 0.08);
+  --border-strong: rgba(26, 29, 38, 0.14);
+  --shadow-sm: 0 1px 3px rgba(26, 29, 38, 0.06);
+  --shadow-md: 0 4px 20px rgba(26, 29, 38, 0.08);
+  --shadow-lg: 0 12px 40px rgba(26, 29, 38, 0.12);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tab-bar-height: 72px;
+  --header-height: 56px;
+}
+
+[data-theme="dark"] {
+  --color-primary: #6b8aff;
+  --color-primary-soft: rgba(107, 138, 255, 0.16);
+  --color-primary-hover: #8aa3ff;
+
+  --bg-app: #0f1117;
+  --bg-card: #1a1d26;
+  --bg-elevated: #22252f;
+  --bg-input: #2a2d38;
+  --bg-tab-bar: rgba(26, 29, 38, 0.94);
+
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
