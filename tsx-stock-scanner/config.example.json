@@ -1,0 +1,15 @@
+{
+  "api_keys": {
+    "financialmodelingprep": "YOUR_FMP_API_KEY",
+    "finnhub": "YOUR_FINNHUB_API_KEY",
+    "alpha_vantage": "YOUR_ALPHA_VANTAGE_API_KEY"
+  },
+  "scoring_weights": {
+    "value": 0.25,
+    "quality": 0.30,
+    "growth": 0.25,
+    "financial_health": 0.20
+  },
+  "cache_dir": "data",
+  "request_delay_seconds": 0.25
+}
