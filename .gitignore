@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# data cache (auto-generated)
+tsx_screener/data/cache/
+tsx_screener/data/tsx_tickers.json
+tsx_screener/data/last_results.json
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
