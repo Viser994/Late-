@@ -6,6 +6,7 @@ import { formatDate, dueLabel, daysUntil, sortByUrgency, getGreeting, formatCurr
 import { escapeHtml, CATEGORY_LABELS, priorityBadge, showToast } from "../utils/helpers.js";
 import { openModal, closeModal } from "./modal.js";
 import { addTask, toggleTask } from "../services/storageService.js";
+import { renderTaskAppActions, bindTaskAppActions } from "./appLinks.js";
 
 /** Render the Today tab */
 export function renderTodayTab(container, state, { onUpdate }) {
@@ -76,6 +77,7 @@ export function renderTodayTab(container, state, { onUpdate }) {
   });
 
   bindTaskEvents(container, state, onUpdate);
+  bindTaskAppActions(container, state.tasks, state.settings);
 }
 
 function renderSection(title, taskList, state, onUpdate) {
@@ -105,6 +107,7 @@ function renderTaskCard(task) {
           ${task.amount != null ? `<span>${formatCurrency(task.amount)}</span>` : ""}
         </div>
         ${task.notes ? `<div class="text-muted mt-1" style="font-size:0.8rem">${escapeHtml(task.notes)}</div>` : ""}
+        ${!task.completed ? renderTaskAppActions(task) : ""}
       </div>
     </div>
   `;

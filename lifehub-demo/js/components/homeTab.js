@@ -8,6 +8,8 @@ import { calculateLifePulse, buildLifeStream } from "../utils/lifeScore.js";
 import { generateClarityBrief } from "../services/clarityService.js";
 import { icon, lifePulseRing } from "./icons.js";
 import { logoMark } from "./logo.js";
+import { renderAppLinksSection, bindAppLinks } from "./appLinks.js";
+import { createFileInput } from "../services/appLinksService.js";
 import { showAddTaskModal } from "./todayTab.js";
 
 /** Render the Home tab */
@@ -18,8 +20,7 @@ export async function renderHomeTab(container, state, { onUpdate, onNavigate }) 
   const name = settings.userName ? escapeHtml(settings.userName) : "there";
   const firstName = name.split(" ")[0];
 
-  // Show skeleton while Clarity Brief loads
-  container.innerHTML = renderHomeShell(firstName, pulse, stream, null, documents.length);
+  container.innerHTML = renderHomeShell(firstName, pulse, stream, null, documents.length, settings);
 
   const brief = await generateClarityBrief(tasks, documents, pulse);
   const briefEl = container.querySelector("#clarity-brief");
@@ -28,9 +29,40 @@ export async function renderHomeTab(container, state, { onUpdate, onNavigate }) 
   }
 
   bindHomeEvents(container, state, onUpdate, onNavigate);
+  bindAppLinks(container, settings, {
+    onCamera: () => {
+      createFileInput({
+        capture: true,
+        accept: "image/*",
+        onSelect: () => {
+          onNavigate?.("documents");
+          showToast("Photo captured — save it in Vault", "success");
+        },
+      });
+    },
+    onPhotos: () => {
+      createFileInput({
+        accept: "image/*",
+        onSelect: () => {
+          onNavigate?.("documents");
+          showToast("Photo selected — save it in Vault", "success");
+        },
+      });
+    },
+    onFiles: () => {
+      createFileInput({
+        accept: ".pdf,.png,.jpg,.jpeg,.webp,.gif",
+        onSelect: () => {
+          onNavigate?.("documents");
+          showToast("File selected — save it in Vault", "success");
+        },
+      });
+    },
+    onEditApps: () => onNavigate?.("settings"),
+  });
 }
 
-function renderHomeShell(firstName, pulse, stream, brief, docCount) {
+function renderHomeShell(firstName, pulse, stream, brief, docCount, settings) {
   const statusColor =
     pulse.score >= 85 ? "var(--color-success)" : pulse.score >= 50 ? "var(--color-warning)" : "var(--color-danger)";
 
@@ -89,6 +121,9 @@ function renderHomeShell(firstName, pulse, stream, brief, docCount) {
             <span>Life Stream</span>
           </button>
         </div>
+
+        <!-- Phone app links -->
+        ${renderAppLinksSection(settings)}
 
         <!-- Life Stream™ preview -->
         ${stream.length > 0 ? renderLifeStreamPreview(stream) : renderEmptyStream()}
@@ -188,8 +223,14 @@ function bindHomeEvents(container, state, onUpdate, onNavigate) {
   });
 
   container.querySelector("#qa-scan")?.addEventListener("click", () => {
-    onNavigate?.("documents");
-    showToast("Open upload from the Vault tab", "info");
+    createFileInput({
+      capture: true,
+      accept: "image/*",
+      onSelect: () => {
+        onNavigate?.("documents");
+        showToast("Open Vault to save your scan", "info");
+      },
+    });
   });
 
   container.querySelector("#qa-stream")?.addEventListener("click", () => {

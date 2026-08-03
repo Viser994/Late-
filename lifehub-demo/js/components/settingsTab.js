@@ -5,6 +5,7 @@
 import { escapeHtml, showToast } from "../utils/helpers.js";
 import { saveSettings, resetAllData, loadState } from "../services/storageService.js";
 import { sendTestNotification, requestPermission } from "../services/notificationService.js";
+import { renderConnectedAppsSettings, bindConnectedAppsSettings } from "./appLinks.js";
 
 /** Render the Settings tab */
 export function renderSettingsTab(container, state, { onUpdate, onReset }) {
@@ -78,6 +79,8 @@ export function renderSettingsTab(container, state, { onUpdate, onReset }) {
         <button class="btn btn--secondary btn--sm mt-1" id="test-notification" style="width:100%">Send Test Notification</button>
       </div>
 
+      ${renderConnectedAppsSettings(settings)}
+
       <div class="settings-group">
         <div class="settings-group__title">Data</div>
         <div class="settings-list">
@@ -143,6 +146,9 @@ export function renderSettingsTab(container, state, { onUpdate, onReset }) {
 
   // Test notification
   container.querySelector("#test-notification").addEventListener("click", sendTestNotification);
+
+  // Connected apps toggles
+  bindConnectedAppsSettings(container, state, onUpdate);
 
   // Reset data
   container.querySelector("#reset-data").addEventListener("click", () => {

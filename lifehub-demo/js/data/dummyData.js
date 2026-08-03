@@ -208,6 +208,7 @@ export const DEFAULT_SETTINGS = {
   onboardingComplete: false,
   userName: "",
   userEmail: "",
+  connectedApps: ["calendar", "phone", "messages", "mail", "camera", "maps", "photos", "files"],
 };
 
 /** Helper: ISO date string N days from today */
