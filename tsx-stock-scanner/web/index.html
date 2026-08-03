@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TSX Stock Scanner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div>
+        <p class="eyebrow">Toronto Stock Exchange</p>
+        <h1>TSX Stock Scanner</h1>
+        <p class="subtitle">Ranked fundamental scores for TSX common shares</p>
+      </div>
+      <div class="meta" id="meta">
+        <span class="badge">Loading...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="controls card">
+      <div class="control-row">
+        <label class="search-wrap">
+          <span class="sr-only">Search</span>
+          <input id="search" type="search" placeholder="Search ticker or company..." autocomplete="off">
+        </label>
+        <select id="sector-filter" aria-label="Filter by sector">
+          <option value="">All sectors</option>
+        </select>
+        <button id="export-btn" type="button">Export CSV</button>
+      </div>
+      <p class="hint">Scores combine value, quality, growth, and financial health. Data refreshes when the site is redeployed.</p>
+    </section>
+
+    <section class="stats" id="stats"></section>
+
+    <section class="card table-wrap">
+      <div class="table-scroll">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th data-sort="rank">Rank</th>
+              <th data-sort="ticker">Ticker</th>
+              <th data-sort="company_name">Company</th>
+              <th data-sort="current_price">Price</th>
+              <th data-sort="score">Score</th>
+              <th data-sort="pe_ratio">P/E</th>
+              <th data-sort="roe">ROE</th>
+              <th data-sort="revenue_growth">Rev Growth</th>
+              <th data-sort="dividend_yield">Div Yield</th>
+              <th data-sort="sector">Sector</th>
+            </tr>
+          </thead>
+          <tbody id="results-body">
+            <tr><td colspan="10" class="loading">Loading rankings...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card detail" id="detail">
+      <h2>Stock Detail</h2>
+      <p class="placeholder">Select a row to view score breakdown and fundamentals.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Data via Yahoo Finance and other free providers. For education only — not financial advice.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

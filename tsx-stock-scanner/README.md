@@ -38,6 +38,14 @@ You can also enter keys via **Settings** in the GUI.
 
 ## Usage
 
+### Public Web App
+
+Once deployed to GitHub Pages, anyone can access the scanner at:
+
+**https://viser994.github.io/Late-/tsx-stock-scanner/**
+
+The site is rebuilt automatically on pushes to `main` and weekly via GitHub Actions.
+
 ### Desktop GUI
 
 ```bash

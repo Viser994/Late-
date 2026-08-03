@@ -28,6 +28,10 @@ jobs:
           mkdir -p public
           cp -r jarvis-demo shawarma-queen-demo public/
           cp pages-index.html public/index.html
+          if [ -d tsx-stock-scanner/web ]; then
+            mkdir -p public/tsx-stock-scanner
+            cp -r tsx-stock-scanner/web/* public/tsx-stock-scanner/
+          fi
 
       - uses: actions/configure-pages@v5
 

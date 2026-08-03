@@ -1,0 +1,61 @@
+name: Build and Deploy TSX Scanner Web App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tsx-stock-scanner/**"
+      - ".github/workflows/tsx-scanner-pages.yml"
+      - "pages-index.html"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tsx-stock-scanner/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r tsx-stock-scanner/requirements.txt
+
+      - name: Scan TSX universe and build web data
+        run: python tsx-stock-scanner/scripts/build_web_data.py --refresh-universe
+
+      - name: Build site
+        run: |
+          mkdir -p public
+          cp -r jarvis-demo shawarma-queen-demo public/ 2>/dev/null || true
+          cp pages-index.html public/index.html
+          mkdir -p public/tsx-stock-scanner
+          cp -r tsx-stock-scanner/web/* public/tsx-stock-scanner/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
