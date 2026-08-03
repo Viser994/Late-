@@ -897,9 +897,9 @@
       </section>
 
       <nav class="bottom-tabs" aria-label="Main navigation">
-        <button class="tab-btn active" type="button" data-tab="today"><span>☀</span>Today</button>
-        <button class="tab-btn" type="button" data-tab="documents"><span>□</span>Documents</button>
-        <button class="tab-btn" type="button" data-tab="settings"><span>⚙</span>Settings</button>
+        <button class="tab-btn active" type="button" data-tab="today"><span>T</span>Today</button>
+        <button class="tab-btn" type="button" data-tab="documents"><span>D</span>Documents</button>
+        <button class="tab-btn" type="button" data-tab="settings"><span>S</span>Settings</button>
       </nav>
     </section>
 
@@ -1105,7 +1105,7 @@
         return `
           <article class="task-card ${urgent ? "urgent" : ""}">
             <button class="task-check ${task.done ? "done" : ""}" type="button" aria-label="Mark ${task.title} complete" data-task="${task.id}">
-              ${task.done ? "✓" : ""}
+              ${task.done ? "OK" : ""}
             </button>
             <div>
               <h4>${task.title}</h4>
