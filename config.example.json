@@ -1,0 +1,9 @@
+{
+  "fmp_api_key": "YOUR_FMP_KEY_HERE",
+  "finnhub_api_key": "YOUR_FINNHUB_KEY_HERE",
+  "alpha_vantage_api_key": "YOUR_ALPHA_VANTAGE_KEY_HERE",
+  "request_timeout_seconds": 12,
+  "max_workers": 8,
+  "max_symbols": 0,
+  "universe_path": "data/tsx_universe.json"
+}
