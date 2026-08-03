@@ -5,12 +5,26 @@ import queue
 import subprocess
 import sys
 import threading
-import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
+
+try:
+    import tkinter as tk
+    from tkinter import filedialog, messagebox, ttk
+except ModuleNotFoundError:
+    class _TkFallback:
+        class Tk:
+            pass
+
+    tk = _TkFallback()  # type: ignore[assignment]
+    filedialog = None  # type: ignore[assignment]
+    messagebox = None  # type: ignore[assignment]
+    ttk = None  # type: ignore[assignment]
+    TKINTER_AVAILABLE = False
+else:
+    TKINTER_AVAILABLE = True
 
 from .config import DEFAULT_CONFIG_PATH, ensure_config, load_settings
-from .scanner import CSV_FIELDS, Scanner, read_results_csv, write_results_csv
+from .scanner import Scanner, read_results_csv, write_results_csv
 from .universe import load_universe, update_universe
 
 
@@ -293,6 +307,13 @@ def main(argv: list[str] | None = None) -> int:
     ensure_config()
     if args.no_gui:
         return run_cli(args)
+    if not TKINTER_AVAILABLE:
+        print(
+            "Tkinter is not installed in this Python environment. "
+            "Install python3-tk on Linux or run with --no-gui.",
+            file=sys.stderr,
+        )
+        return 1
     app = TSXScannerApp()
     app.mainloop()
     return 0

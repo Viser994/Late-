@@ -26,6 +26,12 @@ python -m pip install -r requirements.txt
 cp config.example.ini config.ini
 ```
 
+On minimal Linux installations, install Tkinter separately if you want the desktop UI:
+
+```bash
+sudo apt-get install python3-tk
+```
+
 On Windows CMD, you can also run:
 
 ```cmd

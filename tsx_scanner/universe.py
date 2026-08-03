@@ -59,10 +59,6 @@ def _clean_name(name: str) -> str:
 
 
 def _looks_like_common_share(record: dict) -> bool:
-    text = " ".join(str(value).lower() for value in record.values() if value is not None)
-    if any(term in f" {text}" for term in EXCLUDED_SECURITY_TERMS):
-        return False
-
     security_type = str(
         record.get("instrumentType")
         or record.get("securityType")
@@ -72,6 +68,15 @@ def _looks_like_common_share(record: dict) -> bool:
     ).lower()
     if security_type:
         return any(term in security_type for term in COMMON_SECURITY_TERMS)
+
+    scalar_values = [
+        str(value).lower()
+        for value in record.values()
+        if value is not None and not isinstance(value, (dict, list, tuple))
+    ]
+    text = " ".join(scalar_values)
+    if any(term in f" {text}" for term in EXCLUDED_SECURITY_TERMS):
+        return False
 
     # The TSX endpoint can omit an explicit instrument type; retain ambiguous
     # listed equities unless a non-common term is present.
