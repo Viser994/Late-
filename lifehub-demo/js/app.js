@@ -1,23 +1,27 @@
 /**
  * LifeHub — main application entry point.
- * Wires together onboarding, tabs, services, and state management.
  */
 
 import { loadState, saveSettings } from "./services/storageService.js";
 import { checkAndNotify, showInAppReminders } from "./services/notificationService.js";
 import { renderOnboarding } from "./components/onboarding.js";
+import { renderHomeTab } from "./components/homeTab.js";
 import { renderTodayTab, showAddTaskModal } from "./components/todayTab.js";
 import { renderDocumentsTab } from "./components/documentsTab.js";
 import { renderSettingsTab, applyTheme } from "./components/settingsTab.js";
+import { icon } from "./components/icons.js";
 
-/** Current app state */
 let state = loadState();
-let activeTab = "today";
-
-/** DOM references */
+let activeTab = "home";
 const appEl = document.getElementById("app");
 
-/** Initialize the application */
+const TABS = [
+  { id: "home", label: "Home", iconName: "home" },
+  { id: "today", label: "Today", iconName: "today" },
+  { id: "documents", label: "Vault", iconName: "vault" },
+  { id: "settings", label: "Profile", iconName: "profile" },
+];
+
 function init() {
   applyTheme(state.settings.darkMode);
 
@@ -28,7 +32,6 @@ function init() {
   }
 }
 
-/** Complete onboarding and show main app */
 function finishOnboarding() {
   state.settings.onboardingComplete = true;
   saveSettings(state.settings);
@@ -43,23 +46,17 @@ function finishOnboarding() {
   showInAppReminders(state.tasks);
 }
 
-/** Render the main app shell with tab navigation */
 function renderApp() {
   appEl.innerHTML = `
     <div id="tab-content"></div>
     <nav class="tab-bar" role="navigation" aria-label="Main navigation">
-      <button class="tab-bar__item ${activeTab === "today" ? "tab-bar__item--active" : ""}" data-tab="today">
-        <span class="tab-bar__icon">📋</span>
-        <span>Today</span>
-      </button>
-      <button class="tab-bar__item ${activeTab === "documents" ? "tab-bar__item--active" : ""}" data-tab="documents">
-        <span class="tab-bar__icon">📁</span>
-        <span>Documents</span>
-      </button>
-      <button class="tab-bar__item ${activeTab === "settings" ? "tab-bar__item--active" : ""}" data-tab="settings">
-        <span class="tab-bar__icon">⚙️</span>
-        <span>Settings</span>
-      </button>
+      ${TABS.map(
+        (t) => `
+        <button class="tab-bar__item ${activeTab === t.id ? "tab-bar__item--active" : ""}" data-tab="${t.id}">
+          <span class="tab-bar__icon">${icon(t.iconName, "icon")}</span>
+          <span>${t.label}</span>
+        </button>`
+      ).join("")}
     </nav>
   `;
 
@@ -72,19 +69,24 @@ function renderApp() {
 
   renderActiveTab();
 
-  // Check notifications on load
   if (state.settings.notifications) {
     checkAndNotify(state.tasks, true);
     showInAppReminders(state.tasks);
   }
 }
 
-/** Render the currently active tab */
 function renderActiveTab() {
   const tabContent = document.getElementById("tab-content");
-  const handlers = { onUpdate: handleUpdate, onReset: handleReset };
+  const handlers = {
+    onUpdate: handleUpdate,
+    onReset: handleReset,
+    onNavigate: navigateTo,
+  };
 
   switch (activeTab) {
+    case "home":
+      renderHomeTab(tabContent, state, handlers);
+      break;
     case "today":
       renderTodayTab(tabContent, state, handlers);
       break;
@@ -97,7 +99,11 @@ function renderActiveTab() {
   }
 }
 
-/** Handle state updates from child components */
+function navigateTo(tab) {
+  activeTab = tab;
+  renderApp();
+}
+
 function handleUpdate(newState) {
   state = newState;
   renderActiveTab();
@@ -107,15 +113,11 @@ function handleUpdate(newState) {
   }
 }
 
-/** Handle full data reset */
 function handleReset(freshState) {
   state = freshState;
-  activeTab = "today";
+  activeTab = "home";
   renderApp();
 }
 
-// Boot
 document.addEventListener("DOMContentLoaded", init);
-
-// Expose for FAB on documents tab (global quick-add)
 window.LifeHub = { showAddTask: () => showAddTaskModal(state, handleUpdate) };

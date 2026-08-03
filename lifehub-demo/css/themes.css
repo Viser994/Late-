@@ -1,69 +1,89 @@
-/* LifeHub theme tokens — light & dark mode */
+/* LifeHub — premium design tokens */
 
 :root {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
 
-  /* Brand */
+  /* Brand gradient */
+  --gradient-brand: linear-gradient(135deg, #4f6ef7 0%, #7c5bf0 50%, #a855f7 100%);
+  --gradient-hero: linear-gradient(160deg, #4f6ef7 0%, #6366f1 40%, #7c3aed 100%);
+  --gradient-card: linear-gradient(145deg, rgba(79, 110, 247, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+
+  /* Brand colors */
   --color-primary: #4f6ef7;
-  --color-primary-soft: rgba(79, 110, 247, 0.12);
+  --color-primary-soft: rgba(79, 110, 247, 0.1);
   --color-primary-hover: #3d5ce0;
+  --color-accent: #7c3aed;
+  --color-accent-soft: rgba(124, 58, 237, 0.1);
 
   /* Semantic */
-  --color-success: #22c55e;
-  --color-success-soft: rgba(34, 197, 94, 0.12);
+  --color-success: #10b981;
+  --color-success-soft: rgba(16, 185, 129, 0.1);
   --color-warning: #f59e0b;
-  --color-warning-soft: rgba(245, 158, 11, 0.12);
+  --color-warning-soft: rgba(245, 158, 11, 0.1);
   --color-danger: #ef4444;
-  --color-danger-soft: rgba(239, 68, 68, 0.12);
+  --color-danger-soft: rgba(239, 68, 68, 0.1);
   --color-info: #06b6d4;
-  --color-info-soft: rgba(6, 182, 212, 0.12);
+  --color-info-soft: rgba(6, 182, 212, 0.1);
+  --color-teal: #14b8a6;
+  --color-teal-soft: rgba(20, 184, 166, 0.1);
 
-  /* Light theme surfaces */
-  --bg-app: #f4f6fb;
+  /* Light surfaces */
+  --bg-app: #f8f9fc;
   --bg-card: #ffffff;
   --bg-elevated: #ffffff;
-  --bg-input: #f0f2f8;
-  --bg-tab-bar: rgba(255, 255, 255, 0.92);
+  --bg-input: #f1f3f9;
+  --bg-tab-bar: rgba(255, 255, 255, 0.88);
+  --bg-glass: rgba(255, 255, 255, 0.72);
 
-  --text-primary: #1a1d26;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
   --text-inverse: #ffffff;
 
-  --border-color: rgba(26, 29, 38, 0.08);
-  --border-strong: rgba(26, 29, 38, 0.14);
-  --shadow-sm: 0 1px 3px rgba(26, 29, 38, 0.06);
-  --shadow-md: 0 4px 20px rgba(26, 29, 38, 0.08);
-  --shadow-lg: 0 12px 40px rgba(26, 29, 38, 0.12);
+  --border-color: rgba(15, 23, 42, 0.06);
+  --border-strong: rgba(15, 23, 42, 0.1);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 24px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 12px 48px rgba(15, 23, 42, 0.1);
+  --shadow-glow: 0 8px 32px rgba(79, 110, 247, 0.15);
 
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-full: 9999px;
 
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --tab-bar-height: 72px;
-  --header-height: 56px;
+  --tab-bar-height: 76px;
+  --header-height: 60px;
 }
 
 [data-theme="dark"] {
-  --color-primary: #6b8aff;
-  --color-primary-soft: rgba(107, 138, 255, 0.16);
-  --color-primary-hover: #8aa3ff;
+  --gradient-hero: linear-gradient(160deg, #312e81 0%, #3730a3 40%, #4c1d95 100%);
+  --gradient-card: linear-gradient(145deg, rgba(99, 102, 241, 0.12) 0%, rgba(124, 58, 237, 0.06) 100%);
 
-  --bg-app: #0f1117;
-  --bg-card: #1a1d26;
-  --bg-elevated: #22252f;
-  --bg-input: #2a2d38;
-  --bg-tab-bar: rgba(26, 29, 38, 0.94);
+  --color-primary: #818cf8;
+  --color-primary-soft: rgba(129, 140, 248, 0.14);
+  --color-primary-hover: #a5b4fc;
+  --color-accent: #a78bfa;
+  --color-accent-soft: rgba(167, 139, 250, 0.14);
 
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-tertiary: #6b7280;
+  --bg-app: #0b0d14;
+  --bg-card: #151821;
+  --bg-elevated: #1c1f2b;
+  --bg-input: #232736;
+  --bg-tab-bar: rgba(15, 17, 24, 0.92);
+  --bg-glass: rgba(21, 24, 33, 0.8);
 
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 8px 32px rgba(99, 102, 241, 0.2);
 }

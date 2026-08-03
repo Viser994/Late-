@@ -11,8 +11,9 @@ export function renderSettingsTab(container, state, { onUpdate, onReset }) {
   const { settings } = state;
 
   container.innerHTML = `
-    <div class="header">
-      <div class="header__title">Settings</div>
+    <div class="page-header">
+      <div class="page-header__title">Profile</div>
+      <div class="page-header__sub">Manage your preferences</div>
     </div>
 
     <div class="main">

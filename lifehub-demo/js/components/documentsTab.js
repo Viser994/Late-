@@ -19,12 +19,14 @@ export function renderDocumentsTab(container, state, { onUpdate }) {
       : documents.filter((d) => d.category === activeCategory);
 
   container.innerHTML = `
-    <div class="header">
-      <div class="header__logo">
-        <div class="header__logo-icon">L</div>
-        <div class="header__title">Documents</div>
+    <div class="page-header">
+      <div class="page-header__row">
+        <div>
+          <div class="page-header__title">Secure Vault</div>
+          <div class="page-header__sub">${documents.length} documents protected</div>
+        </div>
+        <button class="btn btn--icon btn--secondary" id="upload-doc-btn" aria-label="Upload document" style="background:var(--color-primary-soft);color:var(--color-primary)">+</button>
       </div>
-      <button class="btn btn--icon btn--secondary" id="upload-doc-btn" aria-label="Upload document">+</button>
     </div>
 
     <div class="main">

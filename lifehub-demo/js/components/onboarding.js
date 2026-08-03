@@ -1,30 +1,38 @@
 /**
- * Onboarding flow — 3 simple slides introducing LifeHub.
+ * Premium onboarding — introduces LifeHub's unique features.
  */
 
 import { escapeHtml } from "../utils/helpers.js";
 
 const SLIDES = [
   {
-    icon: "🏠",
+    visual: "🏠",
     title: "Welcome to LifeHub",
-    text: "Your personal life admin assistant. Keep bills, reminders, and important documents organized in one secure place.",
+    text: "The only app that unifies your bills, documents, and deadlines into one intelligent command center.",
+    feature: "Your life, organized",
   },
   {
-    icon: "✨",
-    title: "AI-Powered Organization",
-    text: "Upload receipts, IDs, and documents. LifeHub extracts dates, amounts, and action items automatically.",
+    visual: "💓",
+    title: "Life Pulse™",
+    text: "A real-time wellness score for your life admin. Know instantly if you're on track or falling behind.",
+    feature: "Exclusive to LifeHub",
   },
   {
-    icon: "🔔",
-    title: "Never Miss a Deadline",
-    text: "Get smart reminders for bills, appointments, and warranty expirations. Your Today dashboard shows what's urgent.",
+    visual: "✨",
+    title: "Clarity Brief™",
+    text: "AI reads your tasks and documents, then tells you exactly what matters today — in plain English.",
+    feature: "Powered by AI",
+  },
+  {
+    visual: "🌊",
+    title: "Life Stream™",
+    text: "Every bill, expiry, and appointment in one unified timeline. See your entire life ahead at a glance.",
+    feature: "World's first",
   },
 ];
 
 let currentSlide = 0;
 
-/** Render the onboarding screen */
 export function renderOnboarding(container, { onComplete }) {
   currentSlide = 0;
 
@@ -35,7 +43,8 @@ export function renderOnboarding(container, { onComplete }) {
     container.innerHTML = `
       <div class="onboarding">
         <div class="onboarding__slides">
-          <div class="onboarding__icon">${slide.icon}</div>
+          <div class="onboarding__visual">${slide.visual}</div>
+          <span class="onboarding__feature">${escapeHtml(slide.feature)}</span>
           <h1 class="onboarding__title">${escapeHtml(slide.title)}</h1>
           <p class="onboarding__text">${escapeHtml(slide.text)}</p>
         </div>
@@ -50,7 +59,7 @@ export function renderOnboarding(container, { onComplete }) {
         <div class="onboarding__actions">
           ${
             isLast
-              ? `<button class="btn btn--primary" id="onboard-finish">Get Started</button>`
+              ? `<button class="btn btn--primary" id="onboard-finish">Enter LifeHub</button>`
               : `<button class="btn btn--primary" id="onboard-next">Continue</button>
                  <button class="btn btn--ghost" id="onboard-skip">Skip</button>`
           }

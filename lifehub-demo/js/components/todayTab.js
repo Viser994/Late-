@@ -20,12 +20,14 @@ export function renderTodayTab(container, state, { onUpdate }) {
   const name = settings.userName ? `, ${escapeHtml(settings.userName)}` : "";
 
   container.innerHTML = `
-    <div class="header">
-      <div>
-        <div class="header__title">${getGreeting()}${name}</div>
-        <div class="header__subtitle">${formatDate(new Date().toISOString())}</div>
+    <div class="page-header">
+      <div class="page-header__row">
+        <div>
+          <div class="page-header__title">Today</div>
+          <div class="page-header__sub">${getGreeting()}${name} · ${formatDate(new Date().toISOString())}</div>
+        </div>
+        <button class="btn btn--icon btn--secondary" id="add-task-btn" aria-label="Add task" style="background:var(--color-primary-soft);color:var(--color-primary)">+</button>
       </div>
-      <button class="btn btn--icon btn--secondary" id="add-task-btn" aria-label="Add task">+</button>
     </div>
 
     <div class="main">
