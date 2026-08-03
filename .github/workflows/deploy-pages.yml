@@ -26,7 +26,7 @@ jobs:
       - name: Build site
         run: |
           mkdir -p public
-          cp -r jarvis-demo shawarma-queen-demo public/
+          cp -r jarvis-demo shawarma-queen-demo lifehub-demo public/
           cp pages-index.html public/index.html
 
       - uses: actions/configure-pages@v5
