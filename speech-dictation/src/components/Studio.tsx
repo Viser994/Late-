@@ -27,6 +27,8 @@ interface MediaSource {
   url: string;
   isVideo: boolean;
   origin: "recording" | "upload";
+  /** Known duration in seconds (recordings only) */
+  durationHint?: number;
 }
 
 type JobStatus =
@@ -64,7 +66,7 @@ export function Studio() {
 
   const busy = job.kind === "uploading" || job.kind === "processing";
 
-  const replaceSource = useCallback((file: File, origin: MediaSource["origin"]) => {
+  const replaceSource = useCallback((file: File, origin: MediaSource["origin"], durationHint?: number) => {
     requestRef.current?.abort();
     setResult(null);
     setSpeakerNames({});
@@ -77,16 +79,17 @@ export function Studio() {
         file.type.startsWith("video/") ||
         (/\.(mp4|webm)$/i.test(file.name) && !file.type.startsWith("audio/")),
       origin,
+      durationHint,
     });
   }, []);
 
   const handleRecording = useCallback(
-    ({ blob, mimeType }: RecordingResult) => {
+    ({ blob, mimeType, durationMs }: RecordingResult) => {
       const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
       const file = new File([blob], `recording-${stamp}.${extensionForMime(mimeType)}`, {
         type: mimeType,
       });
-      replaceSource(file, "recording");
+      replaceSource(file, "recording", durationMs / 1000);
     },
     [replaceSource],
   );
@@ -226,6 +229,7 @@ export function Studio() {
               src={source.url}
               isVideo={source.isVideo}
               title={source.file.name}
+              durationHint={source.durationHint}
               onTimeUpdate={handleTimeUpdate}
             />
 
@@ -319,6 +323,7 @@ export function Studio() {
           src={source.url}
           isVideo={source.isVideo}
           title={source.file.name}
+          durationHint={source.durationHint}
           onTimeUpdate={handleTimeUpdate}
         />
       )}

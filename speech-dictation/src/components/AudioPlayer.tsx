@@ -20,20 +20,33 @@ interface AudioPlayerProps {
   src: string;
   isVideo: boolean;
   title: string;
+  /**
+   * Known duration in seconds, used until the browser reports one. Blobs produced
+   * by MediaRecorder lack a duration header, so Chrome reports `Infinity` at first.
+   */
+  durationHint?: number;
   onTimeUpdate?: (seconds: number) => void;
   ref?: Ref<AudioPlayerHandle>;
 }
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 
-export function AudioPlayer({ src, isVideo, title, onTimeUpdate, ref }: AudioPlayerProps) {
+export function AudioPlayer({
+  src,
+  isVideo,
+  title,
+  durationHint,
+  onTimeUpdate,
+  ref,
+}: AudioPlayerProps) {
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(durationHint ?? 0);
   const [speed, setSpeed] = useState(1);
   const [volume, setVolume] = useState(1);
   const onTimeUpdateRef = useRef(onTimeUpdate);
+  const probingDurationRef = useRef(false);
 
   useEffect(() => {
     onTimeUpdateRef.current = onTimeUpdate;
@@ -84,17 +97,31 @@ export function AudioPlayer({ src, isVideo, title, onTimeUpdate, ref }: AudioPla
     onPause: () => setPlaying(false),
     onEnded: () => setPlaying(false),
     onTimeUpdate: (event: React.SyntheticEvent<HTMLMediaElement>) => {
+      if (probingDurationRef.current) return;
       const t = event.currentTarget.currentTime;
       setCurrentTime(t);
       onTimeUpdateRef.current?.(t);
     },
     onLoadedMetadata: (event: React.SyntheticEvent<HTMLMediaElement>) => {
-      const d = event.currentTarget.duration;
-      setDuration(Number.isFinite(d) ? d : 0);
+      const media = event.currentTarget;
+      if (Number.isFinite(media.duration)) {
+        setDuration(media.duration);
+        return;
+      }
+      // Seeking past the end forces Chrome to scan the WebM and emit the real
+      // duration via `durationchange`; then jump back to the start.
+      probingDurationRef.current = true;
+      const restore = () => {
+        media.removeEventListener("seeked", restore);
+        media.currentTime = 0;
+        probingDurationRef.current = false;
+      };
+      media.addEventListener("seeked", restore);
+      media.currentTime = Number.MAX_SAFE_INTEGER;
     },
     onDurationChange: (event: React.SyntheticEvent<HTMLMediaElement>) => {
       const d = event.currentTarget.duration;
-      if (Number.isFinite(d)) setDuration(d);
+      if (Number.isFinite(d) && d > 0) setDuration(d);
     },
   };
 
