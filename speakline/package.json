@@ -1,0 +1,27 @@
+{
+  "name": "speakline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multilingual speech dictation and speaker-labeled subtitles.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "tsx --test lib/*.test.ts"
+  },
+  "dependencies": {
+    "assemblyai": "^4.42.0",
+    "next": "^15.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "tailwindcss": "^4.1.16",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
