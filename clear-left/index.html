@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Brampton left-turn road safety guide: defensive driving tips for high-volume intersections across Peel Region." />
+  <title>CLEAR LEFT · Brampton Intersection Safety</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: "#0F172A",
+            amber: "#F59E0B",
+            "amber-deep": "#D97706",
+            mist: "#E2E8F0",
+            slateink: "#334155",
+          },
+          fontFamily: {
+            display: ['"Space Grotesk"', "sans-serif"],
+            body: ['"IBM Plex Sans"', "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0F172A;
+      --white: #FFFFFF;
+      --amber: #F59E0B;
+      --amber-deep: #D97706;
+      --mist: #E2E8F0;
+      --ink: #334155;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--navy);
+      background: var(--white);
+    }
+
+    .font-display {
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    /* Atmospheric road-grid field for hero */
+    .hero-field {
+      background:
+        linear-gradient(115deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.78) 42%, rgba(15, 23, 42, 0.55) 100%),
+        linear-gradient(180deg, rgba(245, 158, 11, 0.18) 0%, transparent 38%),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 46px,
+          rgba(255, 255, 255, 0.045) 46px,
+          rgba(255, 255, 255, 0.045) 48px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 46px,
+          rgba(255, 255, 255, 0.035) 46px,
+          rgba(255, 255, 255, 0.035) 48px
+        ),
+        radial-gradient(ellipse 80% 60% at 70% 40%, #1e293b 0%, #0F172A 70%);
+    }
+
+    .lane-dash {
+      stroke-dasharray: 18 14;
+      animation: dash-flow 1.8s linear infinite;
+    }
+
+    @keyframes dash-flow {
+      to { stroke-dashoffset: -32; }
+    }
+
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-amber {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
+    @keyframes sweep {
+      from { transform: translateX(-12%) rotate(-2deg); opacity: 0; }
+      to { transform: translateX(0) rotate(0deg); opacity: 1; }
+    }
+
+    .anim-rise {
+      animation: rise-in 0.7s ease-out both;
+    }
+
+    .anim-rise-delay {
+      animation: rise-in 0.75s ease-out 0.15s both;
+    }
+
+    .anim-rise-late {
+      animation: rise-in 0.8s ease-out 0.3s both;
+    }
+
+    .anim-sweep {
+      animation: sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    }
+
+    .signal-pulse {
+      animation: pulse-amber 2.4s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .step-rail {
+      background: linear-gradient(180deg, var(--amber) 0%, rgba(245, 158, 11, 0.15) 100%);
+    }
+
+    .why-panel {
+      background:
+        linear-gradient(160deg, #FFFFFF 0%, #F8FAFC 55%, #FFF7ED 100%);
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .guide-section {
+      background:
+        radial-gradient(circle at 8% 12%, rgba(245, 158, 11, 0.08), transparent 28%),
+        linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
+    }
+
+    .quiz-section {
+      background:
+        linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #0F172A 100%);
+    }
+
+    .quiz-option {
+      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .quiz-option:hover:not(:disabled) {
+      border-color: var(--amber);
+      transform: translateY(-1px);
+    }
+
+    .quiz-option.is-correct {
+      border-color: #16A34A;
+      background: rgba(22, 163, 74, 0.12);
+    }
+
+    .quiz-option.is-wrong {
+      border-color: #DC2626;
+      background: rgba(220, 38, 38, 0.12);
+    }
+
+    .quiz-option:disabled {
+      cursor: default;
+    }
+
+    .resource-link {
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .resource-link:hover {
+      color: var(--amber);
+      transform: translateX(3px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .lane-dash,
+      .anim-rise,
+      .anim-rise-delay,
+      .anim-rise-late,
+      .anim-sweep,
+      .signal-pulse {
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-white text-navy antialiased">
+  <!-- Skip link -->
+  <a href="#guide" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-navy">
+    Skip to safe left-turn guide
+  </a>
+
+  <!-- HERO -->
+  <header class="hero-field relative min-h-[100svh] overflow-hidden text-white">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <!-- Full-bleed geometric intersection visual -->
+      <svg class="absolute inset-0 h-full w-full anim-sweep" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Stylized multi-lane intersection with a protected left-turn path">
+        <defs>
+          <linearGradient id="roadFill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1E293B" />
+            <stop offset="100%" stop-color="#0F172A" />
+          </linearGradient>
+          <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#F59E0B" />
+          </marker>
+        </defs>
+        <!-- Horizontal arterial -->
+        <rect x="0" y="360" width="1440" height="180" fill="url(#roadFill)" opacity="0.9" />
+        <!-- Vertical arterial -->
+        <rect x="620" y="0" width="200" height="900" fill="url(#roadFill)" opacity="0.9" />
+        <!-- Lane lines -->
+        <line class="lane-dash" x1="0" y1="420" x2="620" y2="420" stroke="#F59E0B" stroke-width="3" opacity="0.7" />
+        <line class="lane-dash" x1="820" y1="480" x2="1440" y2="480" stroke="#F8FAFC" stroke-width="2" opacity="0.35" />
+        <line class="lane-dash" x1="690" y1="0" x2="690" y2="360" stroke="#F8FAFC" stroke-width="2" opacity="0.35" />
+        <line class="lane-dash" x1="750" y1="540" x2="750" y2="900" stroke="#F8FAFC" stroke-width="2" opacity="0.35" />
+        <!-- Dedicated left-turn bay -->
+        <path d="M420 470 H620 Q640 470 640 450 V390" fill="none" stroke="#F59E0B" stroke-width="8" stroke-linecap="round" marker-end="url(#arrowHead)" />
+        <!-- Crosswalk bars -->
+        <g fill="#FFFFFF" opacity="0.55">
+          <rect x="835" y="380" width="14" height="48" />
+          <rect x="860" y="380" width="14" height="48" />
+          <rect x="885" y="380" width="14" height="48" />
+          <rect x="910" y="380" width="14" height="48" />
+          <rect x="935" y="380" width="14" height="48" />
+        </g>
+        <!-- Signal head -->
+        <g transform="translate(560 300)">
+          <rect width="36" height="96" rx="4" fill="#020617" />
+          <circle cx="18" cy="22" r="10" fill="#EF4444" opacity="0.35" />
+          <circle class="signal-pulse" cx="18" cy="48" r="10" fill="#F59E0B" />
+          <circle cx="18" cy="74" r="10" fill="#22C55E" opacity="0.25" />
+        </g>
+        <!-- Truck silhouette blocking sightline -->
+        <g transform="translate(880 300)" opacity="0.5">
+          <rect x="0" y="20" width="110" height="48" rx="4" fill="#64748B" />
+          <rect x="90" y="8" width="40" height="60" rx="3" fill="#475569" />
+          <circle cx="24" cy="72" r="10" fill="#0F172A" />
+          <circle cx="100" cy="72" r="10" fill="#0F172A" />
+        </g>
+      </svg>
+    </div>
+
+    <nav class="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
+      <div class="flex items-baseline gap-2">
+        <span class="font-display text-xl font-bold tracking-tight sm:text-2xl">CLEAR LEFT</span>
+        <span class="hidden text-xs font-medium uppercase tracking-[0.18em] text-amber sm:inline">Brampton</span>
+      </div>
+      <div class="flex items-center gap-5 text-sm font-medium text-white/80">
+        <a href="#why" class="hidden hover:text-amber sm:inline">Why Brampton</a>
+        <a href="#guide" class="hidden hover:text-amber sm:inline">Guide</a>
+        <a href="#quiz" class="hover:text-amber">Quiz</a>
+      </div>
+    </nav>
+
+    <div class="relative z-10 mx-auto flex min-h-[calc(100svh-72px)] max-w-6xl flex-col justify-end px-5 pb-16 pt-10 sm:px-8 sm:pb-20 lg:justify-center lg:pb-24">
+      <p class="anim-rise font-display text-sm font-semibold uppercase tracking-[0.28em] text-amber">
+        CLEAR LEFT
+      </p>
+      <h1 class="anim-rise-delay mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+        Master every left turn at Brampton’s busiest intersections.
+      </h1>
+      <p class="anim-rise-late mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
+        Defensive habits for multi-lane arterials, protected arrows, and heavy truck traffic—built for Brampton drivers.
+      </p>
+      <div class="anim-rise-late mt-8">
+        <a href="#guide" class="inline-flex items-center gap-3 bg-amber px-6 py-3.5 font-display text-base font-bold text-navy transition hover:bg-amber-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
+          Master the Left Turn
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- WHY BRAMPTON -->
+  <section id="why" class="why-panel py-20 sm:py-24">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <div class="max-w-2xl">
+        <p class="font-display text-sm font-semibold uppercase tracking-[0.22em] text-amber-deep">Local context</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Why Brampton intersections need extra focus
+        </h2>
+        <p class="mt-4 text-lg leading-relaxed text-slateink">
+          Left turns fail most often where speed, size, and signal complexity collide. Brampton’s arterials pack all three into every rush hour.
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+        <!-- Arterials -->
+        <article>
+          <div class="mb-4 inline-flex h-14 w-14 items-center justify-center bg-navy text-amber" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="14" width="28" height="4" fill="currentColor" />
+              <rect x="14" y="2" width="4" height="28" fill="currentColor" />
+              <path d="M6 12h4v8H6zM22 12h4v8h-4z" fill="#F59E0B" />
+            </svg>
+          </div>
+          <h3 class="font-display text-xl font-bold">High-volume multi-lane arterials</h3>
+          <p class="mt-3 leading-relaxed text-slateink">
+            Bovaird Drive, Queen Street, Steeles Avenue, and Hurontario/Main carry stacked through-lanes and dedicated turn bays. Gaps close fast—position early and commit only when the path is clear.
+          </p>
+        </article>
+
+        <!-- Advanced green -->
+        <article>
+          <div class="mb-4 inline-flex h-14 w-14 items-center justify-center bg-navy text-amber" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect x="10" y="2" width="12" height="28" rx="2" stroke="currentColor" stroke-width="2" />
+              <circle cx="16" cy="10" r="3.5" fill="#EF4444" opacity="0.35" />
+              <circle cx="16" cy="16" r="3.5" fill="#F59E0B" opacity="0.35" />
+              <path d="M16 20.5 L12 25 h8z" fill="#22C55E" />
+            </svg>
+          </div>
+          <h3 class="font-display text-xl font-bold">Advanced green arrow phases</h3>
+          <p class="mt-3 leading-relaxed text-slateink">
+            Many Brampton signals lead with a protected left arrow, then flip to a permissive solid green. Know which phase you are in—an arrow is protected; a circle green is not.
+          </p>
+        </article>
+
+        <!-- Trucks -->
+        <article>
+          <div class="mb-4 inline-flex h-14 w-14 items-center justify-center bg-navy text-amber" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="10" width="18" height="12" fill="currentColor" />
+              <rect x="20" y="14" width="10" height="8" fill="#F59E0B" />
+              <circle cx="8" cy="24" r="3" stroke="currentColor" stroke-width="2" fill="none" />
+              <circle cx="24" cy="24" r="3" stroke="#F59E0B" stroke-width="2" fill="none" />
+            </svg>
+          </div>
+          <h3 class="font-display text-xl font-bold">Heavy commercial truck traffic</h3>
+          <p class="mt-3 leading-relaxed text-slateink">
+            Distribution corridors and industrial routes mean long vehicles that block sightlines and need wider turning arcs. Wait an extra beat when a truck or large SUV hides opposing lanes.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP-BY-STEP GUIDE -->
+  <section id="guide" class="guide-section py-20 sm:py-24">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <div class="max-w-2xl">
+        <p class="font-display text-sm font-semibold uppercase tracking-[0.22em] text-amber-deep">Defensive sequence</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Step-by-step safe left turn guide
+        </h2>
+        <p class="mt-4 text-lg leading-relaxed text-slateink">
+          Five habits that keep left turns predictable—for you, opposing traffic, and people in the crosswalk.
+        </p>
+      </div>
+
+      <ol class="relative mt-14 space-y-0">
+        <div class="absolute bottom-4 left-[27px] top-4 hidden w-1 step-rail sm:block" aria-hidden="true"></div>
+
+        <!-- Step 1 -->
+        <li class="relative grid gap-4 pb-12 sm:grid-cols-[56px_1fr] sm:gap-8">
+          <div class="relative z-10 flex h-14 w-14 items-center justify-center bg-navy font-display text-xl font-bold text-amber">1</div>
+          <div>
+            <div class="mb-3 inline-flex items-center gap-2 text-amber-deep" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M4 18h10l6-6-6-6H4v12z" stroke="currentColor" stroke-width="2" />
+                <path d="M8 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+              </svg>
+              <span class="font-display text-xs font-semibold uppercase tracking-[0.18em]">Positioning &amp; signaling</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold">Enter the dedicated left-turn lane early</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-slateink">
+              Merge into the turn bay as soon as it opens. Signal continuously, square your vehicle in the lane, and avoid last-second lane cuts that surprise following drivers on Queen, Bovaird, or Steeles.
+            </p>
+          </div>
+        </li>
+
+        <!-- Step 2 -->
+        <li class="relative grid gap-4 pb-12 sm:grid-cols-[56px_1fr] sm:gap-8">
+          <div class="relative z-10 flex h-14 w-14 items-center justify-center bg-navy font-display text-xl font-bold text-amber">2</div>
+          <div>
+            <div class="mb-3 inline-flex items-center gap-2 text-amber-deep" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" />
+                <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+              </svg>
+              <span class="font-display text-xs font-semibold uppercase tracking-[0.18em]">Waiting safely</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold">Keep wheels straight while you wait</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-slateink">
+              If you edge into the intersection on a permissive green, leave your front wheels pointed straight. A rear-end bump with wheels already turned can shove you into oncoming traffic.
+            </p>
+          </div>
+        </li>
+
+        <!-- Step 3 -->
+        <li class="relative grid gap-4 pb-12 sm:grid-cols-[56px_1fr] sm:gap-8">
+          <div class="relative z-10 flex h-14 w-14 items-center justify-center bg-navy font-display text-xl font-bold text-amber">3</div>
+          <div>
+            <div class="mb-3 inline-flex items-center gap-2 text-amber-deep" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <rect x="8" y="2" width="8" height="20" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M10 16h4l-2 4-2-4z" fill="currentColor" />
+              </svg>
+              <span class="font-display text-xs font-semibold uppercase tracking-[0.18em]">Signals &amp; sightlines</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold">Read the signal—and look past the blockage</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-slateink">
+              A green <em>arrow</em> means opposing traffic is held; a solid green circle means you yield. When a truck or large SUV blocks your view, wait until you can see the full opposing lane—not just a sliver of headlights.
+            </p>
+          </div>
+        </li>
+
+        <!-- Step 4 -->
+        <li class="relative grid gap-4 pb-12 sm:grid-cols-[56px_1fr] sm:gap-8">
+          <div class="relative z-10 flex h-14 w-14 items-center justify-center bg-navy font-display text-xl font-bold text-amber">4</div>
+          <div>
+            <div class="mb-3 inline-flex items-center gap-2 text-amber-deep" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <circle cx="8" cy="16" r="3" stroke="currentColor" stroke-width="2" />
+                <path d="M11 16h7l-2-5H9" stroke="currentColor" stroke-width="2" />
+                <path d="M4 20h16" stroke="currentColor" stroke-width="2" />
+              </svg>
+              <span class="font-display text-xs font-semibold uppercase tracking-[0.18em]">Pedestrians &amp; cyclists</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold">Scan the crosswalk you are turning into</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-slateink">
+              Before you accelerate through the turn, check the far-side crosswalk and bike lane. Pedestrians and cyclists have the right-of-way—especially near transit stops and school routes.
+            </p>
+          </div>
+        </li>
+
+        <!-- Step 5 -->
+        <li class="relative grid gap-4 sm:grid-cols-[56px_1fr] sm:gap-8">
+          <div class="relative z-10 flex h-14 w-14 items-center justify-center bg-navy font-display text-xl font-bold text-amber">5</div>
+          <div>
+            <div class="mb-3 inline-flex items-center gap-2 text-amber-deep" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M4 12h10l6-4v8l-6-4H4z" stroke="currentColor" stroke-width="2" />
+                <circle cx="7" cy="12" r="1.5" fill="currentColor" />
+              </svg>
+              <span class="font-display text-xs font-semibold uppercase tracking-[0.18em]">Clearing on amber/red</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold">Finish the turn if you are already committed</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-slateink">
+              If you are lawfully in the intersection when the light turns amber or red, complete the turn carefully once the path is clear. Do not freeze mid-box—and do not rush blindly into a gap you have not verified.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="quiz-section py-20 text-white sm:py-24">
+    <div class="mx-auto max-w-3xl px-5 sm:px-8">
+      <div class="max-w-2xl">
+        <p class="font-display text-sm font-semibold uppercase tracking-[0.22em] text-amber">Interactive check</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Safe or Unsafe?
+        </h2>
+        <p class="mt-4 text-lg leading-relaxed text-white/75">
+          Three Brampton-style scenarios. Choose the safer move—feedback appears instantly.
+        </p>
+      </div>
+
+      <div id="quiz-app" class="mt-10 border border-white/15 bg-white/[0.04] p-6 sm:p-8" role="region" aria-live="polite" aria-label="Safe or Unsafe quiz">
+        <div class="mb-6 flex items-center justify-between gap-4">
+          <p id="quiz-progress" class="font-display text-sm font-semibold uppercase tracking-[0.16em] text-amber">Question 1 of 3</p>
+          <p id="quiz-score" class="text-sm text-white/60">Score: 0</p>
+        </div>
+
+        <h3 id="quiz-question" class="font-display text-xl font-bold leading-snug sm:text-2xl"></h3>
+        <p id="quiz-scenario" class="mt-3 text-white/70 leading-relaxed"></p>
+
+        <div id="quiz-options" class="mt-6 grid gap-3" role="group" aria-labelledby="quiz-question"></div>
+
+        <div id="quiz-feedback" class="mt-5 hidden border-l-4 border-amber bg-black/25 px-4 py-3 text-sm leading-relaxed text-white/90"></div>
+
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <button id="quiz-next" type="button" class="hidden bg-amber px-5 py-2.5 font-display text-sm font-bold text-navy transition hover:bg-amber-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-amber">
+            Next question
+          </button>
+          <button id="quiz-restart" type="button" class="hidden border border-white/30 px-5 py-2.5 font-display text-sm font-bold text-white transition hover:border-amber hover:text-amber focus:outline-none focus-visible:ring-2 focus-visible:ring-amber">
+            Try again
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER / RESOURCES -->
+  <footer class="border-t border-navy/10 bg-navy text-white">
+    <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+      <div class="grid gap-10 md:grid-cols-[1.2fr_1fr]">
+        <div>
+          <p class="font-display text-2xl font-bold tracking-tight">CLEAR LEFT</p>
+          <p class="mt-3 max-w-md text-white/70 leading-relaxed">
+            Educational guidance for defensive left turns in Brampton, Ontario. Not a substitute for the Ontario Highway Traffic Act or official driver training.
+          </p>
+        </div>
+        <div>
+          <h2 class="font-display text-sm font-semibold uppercase tracking-[0.2em] text-amber">Local resources</h2>
+          <ul class="mt-4 space-y-3">
+            <li>
+              <a class="resource-link inline-flex items-center gap-2 text-white/85" href="https://www.peelpolice.ca/en/services/road-safety.aspx" target="_blank" rel="noopener noreferrer">
+                <span aria-hidden="true" class="text-amber">→</span>
+                Peel Regional Police — Road Safety
+              </a>
+            </li>
+            <li>
+              <a class="resource-link inline-flex items-center gap-2 text-white/85" href="https://www.brampton.ca/EN/residents/Roads/Pages/Vision-Zero.aspx" target="_blank" rel="noopener noreferrer">
+                <span aria-hidden="true" class="text-amber">→</span>
+                City of Brampton — Vision Zero
+              </a>
+            </li>
+            <li>
+              <a class="resource-link inline-flex items-center gap-2 text-white/85" href="https://www.ontario.ca/document/official-mto-drivers-handbook/turning-left" target="_blank" rel="noopener noreferrer">
+                <span aria-hidden="true" class="text-amber">→</span>
+                Ontario MTO — Left-turn rules
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <p class="mt-12 border-t border-white/10 pt-6 text-sm text-white/45">
+        © <span id="year"></span> CLEAR LEFT · Brampton intersection education
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      document.getElementById("year").textContent = String(new Date().getFullYear());
+
+      var questions = [
+        {
+          question: "Stale yellow on Hurontario",
+          scenario:
+            "You are waiting to turn left on a permissive green at Hurontario and Steeles. The light turns yellow. Opposing traffic is still moving, and you have not yet entered the intersection.",
+          options: [
+            {
+              label: "Accelerate into the intersection to “beat” the red.",
+              safe: false,
+              feedback: "Unsafe. If you have not entered the intersection, stop for the yellow when you can do so safely. Forcing a late left against moving traffic is a common crash pattern."
+            },
+            {
+              label: "Hold your position before the stop line and wait for the next protected or clear phase.",
+              safe: true,
+              feedback: "Safe. A stale yellow is not an invitation to squeeze a left. Stay back unless you are already lawfully committed in the intersection with a clear path."
+            },
+            {
+              label: "Inch forward with wheels turned left so you can launch the moment a gap appears.",
+              safe: false,
+              feedback: "Unsafe. Wheels turned while waiting raise the risk of being pushed into oncoming lanes if you are rear-ended."
+            }
+          ]
+        },
+        {
+          question: "Blocked sightlines on Bovaird",
+          scenario:
+            "A transport truck in the opposing left-turn bay on Bovaird Drive blocks most of your view of through traffic. Your signal is a solid green circle (no arrow).",
+          options: [
+            {
+              label: "Creep out slowly until you can see past the truck, then turn only when both directions are clear.",
+              safe: true,
+              feedback: "Safe. On a permissive green you must yield. Ease forward only enough to establish a sightline, then complete the turn when the full opposing path is clear."
+            },
+            {
+              label: "Assume opposing traffic sees you and turn at normal speed behind the truck’s bumper.",
+              safe: false,
+              feedback: "Unsafe. Blind turns behind large vehicles are a leading cause of left-turn collisions on multi-lane arterials."
+            },
+            {
+              label: "Honk and proceed—commercial drivers always leave a gap for left turns.",
+              safe: false,
+              feedback: "Unsafe. Never rely on assumed courtesy. Verify the lane yourself before committing."
+            }
+          ]
+        },
+        {
+          question: "Pedestrian right-of-way on Queen Street",
+          scenario:
+            "You have a protected green left arrow on Queen Street. A pedestrian is still finishing the crosswalk you are turning into, walking against a flashing hand.",
+          options: [
+            {
+              label: "Complete the turn promptly—the arrow means you have priority over pedestrians.",
+              safe: false,
+              feedback: "Unsafe. A protected arrow holds opposing vehicles, not people in the crosswalk. Yield until the crosswalk is clear."
+            },
+            {
+              label: "Wait for the pedestrian to clear, then complete the left turn while the arrow is still active if safe.",
+              safe: true,
+              feedback: "Safe. Scan the destination crosswalk before accelerating. Pedestrians and cyclists keep right-of-way until they have cleared your path."
+            },
+            {
+              label: "Edge into the crosswalk to “claim” the turn before the arrow ends.",
+              safe: false,
+              feedback: "Unsafe. Entering an occupied crosswalk endangers the pedestrian and can trap you when the phase ends."
+            }
+          ]
+        }
+      ];
+
+      var index = 0;
+      var score = 0;
+      var answered = false;
+
+      var progressEl = document.getElementById("quiz-progress");
+      var scoreEl = document.getElementById("quiz-score");
+      var questionEl = document.getElementById("quiz-question");
+      var scenarioEl = document.getElementById("quiz-scenario");
+      var optionsEl = document.getElementById("quiz-options");
+      var feedbackEl = document.getElementById("quiz-feedback");
+      var nextBtn = document.getElementById("quiz-next");
+      var restartBtn = document.getElementById("quiz-restart");
+
+      function updateScore() {
+        scoreEl.textContent = "Score: " + score + " / " + questions.length;
+      }
+
+      function renderQuestion() {
+        answered = false;
+        var q = questions[index];
+        progressEl.textContent = "Question " + (index + 1) + " of " + questions.length;
+        questionEl.textContent = q.question;
+        scenarioEl.textContent = q.scenario;
+        feedbackEl.classList.add("hidden");
+        feedbackEl.textContent = "";
+        nextBtn.classList.add("hidden");
+        restartBtn.classList.add("hidden");
+        optionsEl.innerHTML = "";
+
+        q.options.forEach(function (opt, i) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className =
+            "quiz-option w-full border border-white/20 bg-white/[0.03] px-4 py-3.5 text-left text-sm leading-snug text-white/90 sm:text-base";
+          btn.setAttribute("data-index", String(i));
+          btn.innerHTML =
+            '<span class="mr-3 inline-flex h-7 w-7 items-center justify-center border border-white/25 font-display text-xs font-bold text-amber">' +
+            String.fromCharCode(65 + i) +
+            "</span>" +
+            opt.label;
+          btn.addEventListener("click", function () {
+            onAnswer(i);
+          });
+          optionsEl.appendChild(btn);
+        });
+      }
+
+      function onAnswer(choiceIndex) {
+        if (answered) return;
+        answered = true;
+        var q = questions[index];
+        var chosen = q.options[choiceIndex];
+        var buttons = optionsEl.querySelectorAll("button");
+
+        buttons.forEach(function (btn, i) {
+          btn.disabled = true;
+          if (q.options[i].safe) btn.classList.add("is-correct");
+          if (i === choiceIndex && !chosen.safe) btn.classList.add("is-wrong");
+        });
+
+        if (chosen.safe) score += 1;
+        updateScore();
+
+        feedbackEl.textContent = chosen.feedback;
+        feedbackEl.classList.remove("hidden");
+
+        if (index < questions.length - 1) {
+          nextBtn.classList.remove("hidden");
+          nextBtn.textContent = "Next question";
+        } else {
+          feedbackEl.textContent =
+            chosen.feedback +
+            " Final score: " +
+            score +
+            " of " +
+            questions.length +
+            ". Review the guide above, then try again to lock in the habits.";
+          restartBtn.classList.remove("hidden");
+        }
+      }
+
+      nextBtn.addEventListener("click", function () {
+        if (index < questions.length - 1) {
+          index += 1;
+          renderQuestion();
+        }
+      });
+
+      restartBtn.addEventListener("click", function () {
+        index = 0;
+        score = 0;
+        updateScore();
+        renderQuestion();
+      });
+
+      updateScore();
+      renderQuestion();
+    })();
+  </script>
+</body>
+</html>
